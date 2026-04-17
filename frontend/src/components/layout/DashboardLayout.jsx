@@ -1,0 +1,193 @@
+import React, { useState } from 'react';
+import { NavLink, useNavigate, Outlet } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Search,
+  CalendarCheck,
+  Settings,
+  ClipboardList,
+  LogOut,
+  Menu,
+  ChefHat,
+  Utensils,
+  Users,
+} from 'lucide-react';
+import useAuthStore from '../../store/authStore';
+import ThemeToggle from '../common/ThemeToggle';
+import { NAV_ITEMS, ROLE_BADGES } from '../../utils/constants';
+
+const iconMap = {
+  LayoutDashboard,
+  Search,
+  CalendarCheck,
+  Settings,
+  ClipboardList,
+  Utensils,
+  Users,
+};
+
+export default function DashboardLayout() {
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const role = user?.role || 'CUSTOMER';
+  const navItems = NAV_ITEMS[role] || NAV_ITEMS.CUSTOMER;
+  const roleBadge = ROLE_BADGES[role] || ROLE_BADGES.CUSTOMER;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const subtitle = role === 'ADMIN'
+    ? 'Admin Control Panel'
+    : role === 'STAFF'
+    ? 'Kitchen View'
+    : 'RTROM';
+
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Brand */}
+      <div className="px-5 py-6 border-b border-gray-100 dark:border-gray-700/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-orange to-brand-orange-dark flex items-center justify-center shadow-lg shadow-brand-orange/20">
+            <ChefHat className="w-5 h-5 text-white" />
+          </div>
+          {!sidebarCollapsed && (
+            <div className="animate-fade-in">
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
+                EasyDine
+              </h1>
+              <p className="text-[10px] text-gray-400 font-medium tracking-widest uppercase">
+                {subtitle}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {navItems.map((item) => {
+          const IconComponent = iconMap[item.icon];
+          if (item.disabled) {
+            return (
+              <div
+                key={item.label}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-300 dark:text-gray-600 cursor-not-allowed"
+              >
+                {IconComponent && <IconComponent className="w-5 h-5 flex-shrink-0" />}
+                {!sidebarCollapsed && <span>{item.label}</span>}
+                {!sidebarCollapsed && (
+                  <span className="ml-auto text-[9px] bg-gray-100 dark:bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded-full">Soon</span>
+                )}
+              </div>
+            );
+          }
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group
+                ${isActive
+                  ? 'bg-brand-orange/10 text-brand-orange dark:bg-brand-gold/10 dark:text-brand-gold shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200'
+                }`
+              }
+            >
+              {IconComponent && <IconComponent className="w-5 h-5 flex-shrink-0" />}
+              {!sidebarCollapsed && <span className="animate-fade-in">{item.label}</span>}
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      {/* Bottom section */}
+      <div className="px-3 py-4 border-t border-gray-100 dark:border-gray-700/50 space-y-2">
+        <ThemeToggle collapsed={sidebarCollapsed} />
+
+        {!sidebarCollapsed && (
+          <div className="flex items-center gap-3 px-3 py-2 animate-fade-in">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-orange to-brand-gold flex items-center justify-center text-white text-xs font-bold shadow-md">
+              {getInitials(user?.name)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                {user?.name || 'User'}
+              </p>
+              <span className={`inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full border ${roleBadge}`}>
+                {role}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 border border-transparent hover:border-red-200 dark:hover:border-red-800/30"
+        >
+          <LogOut className="w-5 h-5 flex-shrink-0" />
+          {!sidebarCollapsed && <span>Logout</span>}
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-surface-light dark:bg-surface-dark-deep flex">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-white dark:bg-surface-dark border-r border-gray-100 dark:border-gray-700/50 transition-all duration-300 flex-shrink-0
+          ${sidebarCollapsed ? 'w-[72px]' : 'w-64'}
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+      >
+        <SidebarContent />
+        <button
+          onClick={() => setSidebarCollapsed((prev) => !prev)}
+          className="hidden lg:flex absolute -right-3 top-8 w-6 h-6 rounded-full bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-600 items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 shadow-sm transition-colors"
+          aria-label="Toggle sidebar"
+        >
+          <svg className={`w-3 h-3 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      </aside>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="lg:hidden sticky top-0 z-30 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-700/50 px-4 py-3 flex items-center justify-between">
+          <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Open sidebar">
+            <Menu className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-orange to-brand-orange-dark flex items-center justify-center">
+              <ChefHat className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-bold text-gray-900 dark:text-white text-sm">EasyDine</span>
+          </div>
+          <div className="w-10" />
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}
