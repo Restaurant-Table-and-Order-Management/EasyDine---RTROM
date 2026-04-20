@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: easydine
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/rtrom?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: your password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    show-sql: false
+    open-in-view: false
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+jwt:
+  secret: b7f9c2e8a1d34f6c9e0b2a7d5f8c3e6a1b9d4f7c2e8a6b3d5f1c9a7e2d4b6f8
+  expiration: 86400000 # 24 hours in milliseconds
+  refresh-expiration: 604800000 # 7 days in milliseconds
+
+logging:
+  level:
+    root: INFO
+    com.easydine: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

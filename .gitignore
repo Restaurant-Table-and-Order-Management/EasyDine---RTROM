@@ -1,0 +1,43 @@
+# Node / Frontend
+node_modules/
+dist/
+/dist
+
+# Maven / Backend
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.flattened-pom.xml
+
+# Application / Env
+.env
+.env.local
+.env.*.local
+*.local
+application-local.yml
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.iws
+*.iml
+*.ipr
+.c9/
+*.sublime-workspace
+.classpath
+.project
+*.launch
+.settings/
+.factorypath
+
+# OS
+.DS_Store
+Thumbs.db
