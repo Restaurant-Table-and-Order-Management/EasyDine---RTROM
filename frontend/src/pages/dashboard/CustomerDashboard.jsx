@@ -5,9 +5,13 @@ import {
   Star,
   MapPin,
   Clock,
+<<<<<<< HEAD
   ChevronRight,
   Zap,
   Coffee
+=======
+  ChevronRight
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
@@ -41,6 +45,7 @@ export default function CustomerDashboard() {
 
   const completedCount = reservations.filter(r => r.status === 'COMPLETED' || r.status === 'CONFIRMED').length;
 
+<<<<<<< HEAD
   const activeReservations = reservations.filter(
     (r) =>
       r.reservationDate === getTodayDate() &&
@@ -48,6 +53,8 @@ export default function CustomerDashboard() {
       // Simple heuristic: if it's today and confirmed, it's a live session
   );
 
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   const handleSearch = (e) => {
       e.preventDefault();
       // Simple routing with params to tables search page
@@ -60,7 +67,11 @@ export default function CustomerDashboard() {
       <div className="flex-1 space-y-8">
           
         {/* Welcome Hero Banner */}
+<<<<<<< HEAD
         <div className="relative rounded-3xl overflow-hidden bg-gray-900 shadow-xl min-h-[300px]">
+=======
+        <div className="relative rounded-3xl overflow-hidden bg-gray-900 shadow-xl h-[280px]">
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
            {/* Beautiful background image */}
            <img 
                src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=1600" 
@@ -69,7 +80,11 @@ export default function CustomerDashboard() {
            />
            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
            
+<<<<<<< HEAD
            <div className="relative p-8 flex flex-col justify-end h-full pt-16">
+=======
+           <div className="absolute inset-0 p-8 flex flex-col justify-end">
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
                <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 leading-tight">
                    Welcome back, {user?.name?.split(' ')[0]}!
                </h1>
@@ -78,14 +93,22 @@ export default function CustomerDashboard() {
                </p>
                
                {/* Quick booking form IN the banner */}
+<<<<<<< HEAD
                <form onSubmit={handleSearch} className="bg-white/10 backdrop-blur-md border border-white/20 p-3 rounded-2xl flex flex-wrap items-center gap-2 w-full">
+=======
+               <form onSubmit={handleSearch} className="bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-2xl flex flex-col sm:flex-row gap-2 max-w-3xl">
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
                    <input 
                        type="date" 
                        min={getTodayDate()}
                        required
                        value={searchParams.date}
                        onChange={e => setSearchParams({...searchParams, date: e.target.value})}
+<<<<<<< HEAD
                        className="flex-1 min-w-[140px] px-4 py-3 bg-white text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange text-sm font-medium"
+=======
+                       className="px-4 py-3 bg-white text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange text-sm font-medium w-full sm:w-auto"
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
                    />
                    <input 
                        type="time" 
@@ -93,24 +116,37 @@ export default function CustomerDashboard() {
                        step="1800"
                        value={searchParams.time}
                        onChange={e => setSearchParams({...searchParams, time: e.target.value})}
+<<<<<<< HEAD
                        className="flex-1 min-w-[120px] px-4 py-3 bg-white text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange text-sm font-medium"
+=======
+                       className="px-4 py-3 bg-white text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange text-sm font-medium w-full sm:w-auto"
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
                    />
                    <select 
                        value={searchParams.capacity}
                        onChange={e => setSearchParams({...searchParams, capacity: Number(e.target.value)})}
+<<<<<<< HEAD
                        className="flex-1 min-w-[110px] px-4 py-3 bg-white text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange text-sm font-medium"
+=======
+                       className="px-4 py-3 bg-white text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange text-sm font-medium w-full sm:w-28"
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
                    >
                        {[1,2,3,4,5,6,8,10,12].map(n => (
                            <option key={n} value={n}>{n} Guests</option>
                        ))}
                    </select>
+<<<<<<< HEAD
                    <Button type="submit" className="whitespace-nowrap px-6 rounded-xl bg-brand-orange text-white shrink-0">
+=======
+                   <Button type="submit" className="whitespace-nowrap px-8 rounded-xl bg-brand-orange text-white flex-1 sm:flex-none">
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
                        Find Tables
                    </Button>
                </form>
            </div>
         </div>
 
+<<<<<<< HEAD
         {/* Active Session Alert (If any) */}
         {activeReservations.length > 0 && (
           <Card className="bg-gradient-to-r from-brand-orange/10 to-brand-gold/10 border-brand-orange/20 shadow-lg p-0 overflow-hidden group mb-8">
@@ -132,6 +168,8 @@ export default function CustomerDashboard() {
           </Card>
         )}
 
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
         {/* Upcoming Reservations List */}
         <div>
             <div className="flex items-center justify-between mb-4">

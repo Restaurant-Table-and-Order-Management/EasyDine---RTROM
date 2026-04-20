@@ -8,7 +8,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+<<<<<<< HEAD
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,9 +44,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error("An internal server error occurred"));
     }
+<<<<<<< HEAD
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleNoResourceFound(NoResourceFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("Resource not found"));
     }
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 }

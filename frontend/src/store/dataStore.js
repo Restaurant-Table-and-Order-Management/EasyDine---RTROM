@@ -11,10 +11,13 @@ const useDataStore = create((set, get) => ({
   reservations: [],
   reservationsLoading: false,
 
+<<<<<<< HEAD
   // Menu state
   menuItems: [],
   menuLoading: false,
 
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   // Search state
   searchParams: {
     date: '',
@@ -34,7 +37,11 @@ const useDataStore = create((set, get) => ({
     set({ tablesLoading: true });
     try {
       const response = await api.get('/tables');
+<<<<<<< HEAD
       set({ tables: Array.isArray(response) ? response : (response.data || []), tablesLoading: false });
+=======
+      set({ tables: response.data || [], tablesLoading: false });
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     } catch (error) {
       set({ tablesLoading: false });
     }
@@ -47,7 +54,11 @@ const useDataStore = create((set, get) => ({
         params: { date, time, capacity: parseInt(capacity) },
       });
       set({
+<<<<<<< HEAD
         searchResults: Array.isArray(response) ? response : (response.data || []),
+=======
+        searchResults: response.data || [],
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
         searchLoading: false,
         searchParams: { date, time, capacity },
       });
@@ -89,6 +100,7 @@ const useDataStore = create((set, get) => ({
     }
   },
 
+<<<<<<< HEAD
   deleteTable: async (id) => {
     try {
       await api.delete(`/tables/${id}`);
@@ -104,6 +116,8 @@ const useDataStore = create((set, get) => ({
     }
   },
 
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   selectTable: (table) => {
     set({ selectedTable: table, rightPanelContent: 'booking' });
   },
@@ -131,7 +145,11 @@ const useDataStore = create((set, get) => ({
     set({ reservationsLoading: true });
     try {
       const response = await api.get('/reservations/my');
+<<<<<<< HEAD
       set({ reservations: Array.isArray(response) ? response : (response.data || []), reservationsLoading: false });
+=======
+      set({ reservations: response.data || [], reservationsLoading: false });
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     } catch (error) {
       set({ reservationsLoading: false });
     }
@@ -144,7 +162,11 @@ const useDataStore = create((set, get) => ({
       if (date) params.date = date;
       if (status && status !== 'ALL') params.status = status;
       const response = await api.get('/reservations', { params });
+<<<<<<< HEAD
       set({ reservations: Array.isArray(response) ? response : (response.data || []), reservationsLoading: false });
+=======
+      set({ reservations: response.data || [], reservationsLoading: false });
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     } catch (error) {
       set({ reservationsLoading: false });
     }
@@ -184,6 +206,7 @@ const useDataStore = create((set, get) => ({
     }
   },
 
+<<<<<<< HEAD
   // ===================== MENU ACTIONS =====================
 
   fetchMenuItems: async () => {
@@ -243,6 +266,8 @@ const useDataStore = create((set, get) => ({
     }
   },
 
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   // ===================== UI ACTIONS =====================
 
   setRightPanelContent: (content) => set({ rightPanelContent: content }),

@@ -11,12 +11,18 @@ import {
   ChefHat,
   Utensils,
   Users,
+<<<<<<< HEAD
   ShoppingBag
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useCartStore from '../../store/cartStore';
 import ThemeToggle from '../common/ThemeToggle';
 import CartDrawer from './CartDrawer';
+=======
+} from 'lucide-react';
+import useAuthStore from '../../store/authStore';
+import ThemeToggle from '../common/ThemeToggle';
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 import { NAV_ITEMS, ROLE_BADGES } from '../../utils/constants';
 
 const iconMap = {
@@ -27,8 +33,11 @@ const iconMap = {
   ClipboardList,
   Utensils,
   Users,
+<<<<<<< HEAD
   ClipboardList,
   ShoppingBag,
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 };
 
 export default function DashboardLayout() {
@@ -36,10 +45,13 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+<<<<<<< HEAD
   const [cartOpen, setCartOpen] = useState(false);
   
   const { getTotalItems } = useCartStore();
   const cartItemCount = getTotalItems();
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 
   const role = user?.role || 'CUSTOMER';
   const navItems = NAV_ITEMS[role] || NAV_ITEMS.CUSTOMER;
@@ -190,6 +202,7 @@ export default function DashboardLayout() {
             </div>
             <span className="font-bold text-gray-900 dark:text-white text-sm">EasyDine</span>
           </div>
+<<<<<<< HEAD
 
           <div className="flex items-center gap-2">
             {role === 'CUSTOMER' && (
@@ -226,14 +239,20 @@ export default function DashboardLayout() {
               <span className="text-sm font-bold">My Order</span>
             </button>
           )}
+=======
+          <div className="w-10" />
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
+<<<<<<< HEAD
 
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     </div>
   );
 }

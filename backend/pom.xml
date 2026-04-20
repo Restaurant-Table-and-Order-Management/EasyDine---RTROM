@@ -57,12 +57,26 @@
             <scope>runtime</scope>
         </dependency>
 
+<<<<<<< HEAD
+=======
+        <!-- Dotenv -->
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+<<<<<<< HEAD
             <version>${lombok.version}</version>
             <scope>provided</scope>
+=======
+            <optional>true</optional>
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
         </dependency>
 
         <!-- MapStruct -->
