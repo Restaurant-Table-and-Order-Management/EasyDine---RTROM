@@ -1,3 +1,19 @@
+<<<<<<< HEAD
+# EasyDine - RTROM (Restaurant Table Reservation and Order Management)
+
+A full-stack web application designed for restaurant digital operations, enabling real-time table management, order tracking, and menu customization.
+
+## Features
+- Interactive Table Reservation system
+- Real-time Order Management with cart and tracking
+- Comprehensive Menu administration
+- Secure Role-Based Authentication
+
+## Tech Stack
+- **Frontend:** React JS, Vite, Zustand, Tailwind CSS
+- **Backend:** Java Spring Boot, Spring Security, Hibernate ORM
+- **Database:** MySQL
+=======
 # 🍽️ EasyDine: RTROM System
 
 **R**estaurant **T**able **R**eservation and **O**rder **M**anagement system.
@@ -64,3 +80,4 @@
 ---
 
 **Current Version**: 0.1.0-alpha (Epic 1 Stable)
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77

@@ -1,3 +1,14 @@
+<<<<<<< HEAD
+# Visual Structure
+
+## Frontend Pages
+1. **Login Page**: Authentication view for Staff and Admin.
+2. **Dashboard**: High-level overview of active orders and table states.
+3. **Table Management**: Visual layout of restaurant tables highlighting current occupancy.
+4. **Menu Page**: Grid display of available items with filtering by category and dietary properties.
+5. **Cart Drawer**: Unified accessible active order builder sliding from the right side.
+6. **Order Tracking**: Detailed view of placed orders and their statuses in real time.
+=======
 # 🎨 EasyDine - Visual Project Structure
 
 ## Complete Directory Tree
@@ -402,3 +413,4 @@ Verify setup is complete:
 **Total Files:** 30+  
 **Total Lines of Code:** 2000+  
 **Ready for Development:** YES ✅
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77

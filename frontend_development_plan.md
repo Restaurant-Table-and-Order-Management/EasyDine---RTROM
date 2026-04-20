@@ -1,3 +1,26 @@
+<<<<<<< HEAD
+# Frontend Development Plan
+
+## Phase 1: Foundational Structure & Environment Initialisation
+- Setup React with Vite.
+- Configure Tailwind CSS.
+- Establish Axios configuration and basic Authentication flows.
+
+## Phase 2: Core State & Routing
+- Integrate Zustand for Global State Management (Cart, Auth, Theme).
+- Establish protected routes wrapper.
+
+## Phase 3: Module Implementation (Epic 1 & 2)
+### User Authentication
+- Develop robust multi-role Login components.
+
+### Table Management System
+- Interactive grid mappings mapped to backend tables state.
+
+### Menu Listing & Cart
+- Complex filtering menu architecture to support smooth cart interactions.
+- Accessible side navigation drawer implementation for placing orders seamlessly.
+=======
 # 🏗️ Frontend Development Plan: EasyDine Epic 1
 
 This document serves as the technical blueprint for developing the frontend of **EasyDine RTROM**. It maps directly to the finalized Spring Boot backend architecture.
@@ -137,3 +160,4 @@ We recommended **Zustand** for its simplicity over Redux.
 4. **Table Module**: List and Availability search.
 5. **Reservation Module**: Create booking flow & My Reservations view.
 6. **Admin Module**: Confirm/Cancel actions and Status Management.
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77

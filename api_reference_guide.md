@@ -1,3 +1,30 @@
+<<<<<<< HEAD
+# API Reference Guide
+
+## Base URL
+`/api`
+
+## Authentication
+`POST /auth/login` - Authenticate users  
+`POST /auth/register` - Register new user  
+
+## Tables
+`GET /tables` - Fetch all tables in system  
+`POST /tables` - Create a new table  
+`PUT /tables/{id}/status` - Update table status  
+`DELETE /tables/{id}` - Delete a table  
+
+## Orders
+`GET /orders` - Fetch orders  
+`POST /orders` - Place a new order  
+`PUT /orders/{id}/status` - Update order progression status  
+
+## Menu
+`GET /menu` - Fetch all menu items  
+`POST /menu` - Add a new menu item  
+`PUT /menu/{id}` - Modify existing menu item  
+`DELETE /menu/{id}` - Remove menu item
+=======
 # 📖 EasyDine Backend API Reference
 
 This guide provides the exact specifications for all backend APIs currently implemented in the EasyDine project. Use this for Axios service layer development.
@@ -135,3 +162,4 @@ This guide provides the exact specifications for all backend APIs currently impl
 | `startTime`| LocalTime | HH:mm:ss |
 | `status` | Enum | PENDING, CONFIRMED, CANCELLED |
 | `guestCount` | Integer | Number of guests |
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77

@@ -11,9 +11,18 @@ import {
   ChefHat,
   Utensils,
   Users,
+<<<<<<< HEAD
+  ShoppingBag
+} from 'lucide-react';
+import useAuthStore from '../../store/authStore';
+import useCartStore from '../../store/cartStore';
+import ThemeToggle from '../common/ThemeToggle';
+import CartDrawer from './CartDrawer';
+=======
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import ThemeToggle from '../common/ThemeToggle';
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 import { NAV_ITEMS, ROLE_BADGES } from '../../utils/constants';
 
 const iconMap = {
@@ -24,6 +33,11 @@ const iconMap = {
   ClipboardList,
   Utensils,
   Users,
+<<<<<<< HEAD
+  ClipboardList,
+  ShoppingBag,
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 };
 
 export default function DashboardLayout() {
@@ -31,6 +45,13 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+<<<<<<< HEAD
+  const [cartOpen, setCartOpen] = useState(false);
+  
+  const { getTotalItems } = useCartStore();
+  const cartItemCount = getTotalItems();
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 
   const role = user?.role || 'CUSTOMER';
   const navItems = NAV_ITEMS[role] || NAV_ITEMS.CUSTOMER;
@@ -181,13 +202,57 @@ export default function DashboardLayout() {
             </div>
             <span className="font-bold text-gray-900 dark:text-white text-sm">EasyDine</span>
           </div>
+<<<<<<< HEAD
+
+          <div className="flex items-center gap-2">
+            {role === 'CUSTOMER' && (
+              <button 
+                onClick={() => setCartOpen(true)}
+                className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all relative"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-brand-orange text-white text-[10px] font-black flex items-center justify-center shadow-lg shadow-brand-orange/20 animate-scale-in">
+                    {cartItemCount}
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
+        </header>
+
+        {/* Desktop Header - Only for Customer Cart for now */}
+        <header className="hidden lg:flex sticky top-0 z-30 bg-white/40 dark:bg-surface-dark-deep/40 backdrop-blur-xl px-8 py-4 items-center justify-end">
+          {role === 'CUSTOMER' && (
+            <button 
+              onClick={() => setCartOpen(true)}
+              className="px-4 py-2 rounded-2xl bg-white dark:bg-surface-dark text-gray-600 dark:text-gray-300 hover:text-brand-orange dark:hover:text-brand-orange border border-gray-100 dark:border-gray-800 shadow-sm transition-all flex items-center gap-3 group relative"
+            >
+              <div className="relative">
+                <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-brand-orange text-white text-[9px] font-black flex items-center justify-center shadow-md">
+                    {cartItemCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-sm font-bold">My Order</span>
+            </button>
+          )}
+=======
           <div className="w-10" />
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
+<<<<<<< HEAD
+
+      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     </div>
   );
 }

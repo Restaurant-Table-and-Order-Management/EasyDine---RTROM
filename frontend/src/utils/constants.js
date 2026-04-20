@@ -62,6 +62,10 @@ export const NAV_ITEMS = {
   ADMIN: [
     { label: 'Dashboard', path: '/admin/dashboard', icon: 'LayoutDashboard' },
     { label: 'Table Management', path: '/admin/tables', icon: 'Utensils' },
+<<<<<<< HEAD
+    { label: 'Menu Management', path: '/admin/menu', icon: 'ClipboardList' },
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     { label: 'Reservations', path: '/admin/reservations', icon: 'CalendarCheck' },
     { label: 'Staff Management', path: '#', icon: 'Users', disabled: true },
     { label: 'Settings', path: '#', icon: 'Settings', disabled: true },
@@ -72,6 +76,10 @@ export const NAV_ITEMS = {
   ],
   CUSTOMER: [
     { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },
+<<<<<<< HEAD
+    { label: 'Browse Menu', path: '/menu', icon: 'Utensils' },
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     { label: 'Find Tables', path: '/tables', icon: 'Search' },
     { label: 'My Reservations', path: '/my-reservations', icon: 'CalendarCheck' },
   ],

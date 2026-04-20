@@ -1,3 +1,27 @@
+<<<<<<< HEAD
+# Node / Frontend
+node_modules/
+dist/
+/dist
+
+# Maven / Backend
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.flattened-pom.xml
+
+# Application / Env
+.env
+.env.local
+.env.*.local
+*.local
+application-local.yml
+*.log
+=======
 # Backend
 backend/target/
 backend/.idea/
@@ -8,6 +32,7 @@ frontend/node_modules/
 frontend/dist/
 frontend/.DS_Store
 frontend/*.local
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 
 # IDE
 .idea/
@@ -15,11 +40,26 @@ frontend/*.local
 *.swp
 *.swo
 *~
+<<<<<<< HEAD
+*.iws
+*.iml
+*.ipr
 .c9/
+*.sublime-workspace
+.classpath
+.project
+*.launch
+.settings/
+.factorypath
+=======
+.c9/
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 
 # OS
 .DS_Store
 Thumbs.db
+<<<<<<< HEAD
+=======
 
 # Env
 .env
@@ -32,3 +72,4 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77

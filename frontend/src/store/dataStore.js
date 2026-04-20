@@ -11,6 +11,13 @@ const useDataStore = create((set, get) => ({
   reservations: [],
   reservationsLoading: false,
 
+<<<<<<< HEAD
+  // Menu state
+  menuItems: [],
+  menuLoading: false,
+
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   // Search state
   searchParams: {
     date: '',
@@ -30,7 +37,11 @@ const useDataStore = create((set, get) => ({
     set({ tablesLoading: true });
     try {
       const response = await api.get('/tables');
+<<<<<<< HEAD
+      set({ tables: Array.isArray(response) ? response : (response.data || []), tablesLoading: false });
+=======
       set({ tables: response.data || [], tablesLoading: false });
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     } catch (error) {
       set({ tablesLoading: false });
     }
@@ -43,7 +54,11 @@ const useDataStore = create((set, get) => ({
         params: { date, time, capacity: parseInt(capacity) },
       });
       set({
+<<<<<<< HEAD
+        searchResults: Array.isArray(response) ? response : (response.data || []),
+=======
         searchResults: response.data || [],
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
         searchLoading: false,
         searchParams: { date, time, capacity },
       });
@@ -85,6 +100,24 @@ const useDataStore = create((set, get) => ({
     }
   },
 
+<<<<<<< HEAD
+  deleteTable: async (id) => {
+    try {
+      await api.delete(`/tables/${id}`);
+      set((state) => ({
+        tables: state.tables.filter((item) => item.id !== id),
+      }));
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete table',
+      };
+    }
+  },
+
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   selectTable: (table) => {
     set({ selectedTable: table, rightPanelContent: 'booking' });
   },
@@ -112,7 +145,11 @@ const useDataStore = create((set, get) => ({
     set({ reservationsLoading: true });
     try {
       const response = await api.get('/reservations/my');
+<<<<<<< HEAD
+      set({ reservations: Array.isArray(response) ? response : (response.data || []), reservationsLoading: false });
+=======
       set({ reservations: response.data || [], reservationsLoading: false });
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     } catch (error) {
       set({ reservationsLoading: false });
     }
@@ -125,7 +162,11 @@ const useDataStore = create((set, get) => ({
       if (date) params.date = date;
       if (status && status !== 'ALL') params.status = status;
       const response = await api.get('/reservations', { params });
+<<<<<<< HEAD
+      set({ reservations: Array.isArray(response) ? response : (response.data || []), reservationsLoading: false });
+=======
       set({ reservations: response.data || [], reservationsLoading: false });
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     } catch (error) {
       set({ reservationsLoading: false });
     }
@@ -165,6 +206,68 @@ const useDataStore = create((set, get) => ({
     }
   },
 
+<<<<<<< HEAD
+  // ===================== MENU ACTIONS =====================
+
+  fetchMenuItems: async () => {
+    set({ menuLoading: true });
+    try {
+      const response = await api.get('/menu');
+      set({ menuItems: Array.isArray(response) ? response : (response.data || []), menuLoading: false });
+    } catch (error) {
+      set({ menuLoading: false });
+    }
+  },
+
+  createMenuItem: async (menuData) => {
+    try {
+      const response = await api.post('/menu', menuData);
+      const newItem = response.data || response;
+      set((state) => ({ menuItems: [...state.menuItems, newItem] }));
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to create menu item',
+      };
+    }
+  },
+
+  updateMenuItem: async (id, menuData) => {
+    try {
+      const response = await api.put(`/menu/${id}`, menuData);
+      const updated = response.data || response;
+      set((state) => ({
+        menuItems: state.menuItems.map((item) =>
+          item.id === id ? updated : item
+        ),
+      }));
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update menu item',
+      };
+    }
+  },
+
+  deleteMenuItem: async (id) => {
+    try {
+      await api.delete(`/menu/${id}`);
+      set((state) => ({
+        menuItems: state.menuItems.filter((item) => item.id !== id),
+      }));
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete menu item',
+      };
+    }
+  },
+
+=======
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   // ===================== UI ACTIONS =====================
 
   setRightPanelContent: (content) => set({ rightPanelContent: content }),
