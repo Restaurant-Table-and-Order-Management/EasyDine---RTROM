@@ -1,22 +1,32 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ChefHat, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, ChefHat, ArrowRight, ShieldCheck, Users, Utensils } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import toast from 'react-hot-toast';
+import { USER_ROLES } from '../../utils/constants';
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { signup, isLoading } = useAuthStore();
+  const { signup, isLoading, getRoleRedirect } = useAuthStore();
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    role: USER_ROLES.CUSTOMER,
     password: '',
     confirmPassword: '',
   });
-  const [errors, setErrors] = useState({});
+  const [formErrors, setFormErrors] = useState({});
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
 
   const validate = () => {
     const newErrors = {};
@@ -40,26 +50,24 @@ export default function SignupPage() {
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    setErrors(newErrors);
+    setFormErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
-    const result = await signup(formData.name, formData.email, formData.password);
+    const result = await signup(
+      formData.name,
+      formData.email,
+      formData.password,
+      formData.role
+    );
+    
     if (result.success) {
       toast.success(`Welcome, ${result.user.name}! Account created.`);
-      navigate('/dashboard');
+      navigate(getRoleRedirect());
     } else {
       toast.error(result.message);
     }
@@ -100,8 +108,8 @@ export default function SignupPage() {
       </div>
 
       {/* Right side — form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-white dark:bg-surface-dark-deep">
-        <div className="w-full max-w-md animate-slide-up">
+      <div className="flex-1 flex items-center justify-center p-6 bg-white dark:bg-surface-dark-deep overflow-y-auto">
+        <div className="w-full max-w-md animate-slide-up py-8">
           {/* Mobile brand */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-orange to-brand-orange-dark flex items-center justify-center shadow-lg shadow-brand-orange/20">
@@ -133,8 +141,8 @@ export default function SignupPage() {
               name="name"
               placeholder="John Doe"
               value={formData.name}
-              onChange={handleChange}
-              error={errors.name}
+              onChange={handleInputChange}
+              error={formErrors.name}
               icon={User}
             />
 
@@ -144,10 +152,42 @@ export default function SignupPage() {
               name="email"
               placeholder="you@example.com"
               value={formData.email}
-              onChange={handleChange}
-              error={errors.email}
+              onChange={handleInputChange}
+              error={formErrors.email}
               icon={Mail}
             />
+
+            {/* Role Selection */}
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Register as
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { id: USER_ROLES.CUSTOMER, label: 'Customer', icon: User },
+                  { id: USER_ROLES.KITCHEN_STAFF, label: 'Kitchen', icon: ChefHat },
+                  { id: USER_ROLES.ADMIN, label: 'Admin', icon: ShieldCheck },
+                ].map((role) => {
+                  const Icon = role.icon;
+                  const isSelected = formData.role === role.id;
+                  return (
+                    <button
+                      key={role.id}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, role: role.id }))}
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all group ${
+                        isSelected 
+                          ? 'border-brand-orange bg-brand-orange/5 text-brand-orange shadow-sm' 
+                          : 'border-gray-100 dark:border-gray-800 hover:border-brand-orange/30 text-gray-500 dark:text-gray-400'
+                      }`}
+                    >
+                      <Icon className={`w-5 h-5 mb-1.5 transition-transform group-hover:scale-110 ${isSelected ? 'text-brand-orange' : ''}`} />
+                      <span className="text-[10px] font-bold uppercase tracking-wider">{role.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <Input
               label="Password"
@@ -155,8 +195,8 @@ export default function SignupPage() {
               name="password"
               placeholder="••••••••"
               value={formData.password}
-              onChange={handleChange}
-              error={errors.password}
+              onChange={handleInputChange}
+              error={formErrors.password}
               icon={Lock}
               helperText="Minimum 6 characters"
             />
@@ -167,8 +207,8 @@ export default function SignupPage() {
               name="confirmPassword"
               placeholder="••••••••"
               value={formData.confirmPassword}
-              onChange={handleChange}
-              error={errors.confirmPassword}
+              onChange={handleInputChange}
+              error={formErrors.confirmPassword}
               icon={Lock}
             />
 

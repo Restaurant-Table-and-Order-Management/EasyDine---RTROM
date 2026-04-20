@@ -5,7 +5,6 @@ import useAuthStore from '../../store/authStore';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
-import { QUICK_LOGIN_ACCOUNTS } from '../../utils/constants';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -40,24 +39,8 @@ export default function LoginPage() {
     e?.preventDefault();
     if (!validate()) return;
     
-    // Explicitly destructure for clarity
-    const email = formData.email;
-    const password = formData.password;
-
-    const result = await login(email, password);
+    const result = await login(formData.email, formData.password);
     if (result.success) {
-      // The redirect is now handled by the updated getRoleRedirect logic
-      navigate(getRoleRedirect());
-    }
-  };
-
-  const handleQuickLogin = async (roleKey) => {
-    const credentials = QUICK_LOGIN_ACCOUNTS[roleKey];
-    setFormData({ email: credentials.email, password: credentials.password });
-    
-    // Use the explicit variables since state might not have updated yet
-    const result = await login(credentials.email, credentials.password);
-     if (result.success) {
       navigate(getRoleRedirect());
     }
   };
@@ -172,36 +155,6 @@ export default function LoginPage() {
               </p>
             </div>
           </Card>
-
-          {/* Quick Login Section for Demo */}
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-surface-light dark:bg-surface-dark-deep text-gray-500">Demo Quick Login</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 gap-3">
-              {Object.keys(QUICK_LOGIN_ACCOUNTS).map((role) => {
-                const acct = QUICK_LOGIN_ACCOUNTS[role];
-                return (
-                  <button
-                    key={role}
-                    type="button"
-                    disabled={isLoading}
-                    onClick={() => handleQuickLogin(role)}
-                    className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white ${acct.color} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
-                  >
-                    {acct.label}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
         </div>
       </div>
     </div>

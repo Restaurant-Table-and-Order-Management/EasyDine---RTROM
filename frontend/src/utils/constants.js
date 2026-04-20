@@ -16,6 +16,7 @@ export const RESERVATION_STATUSES = {
 export const USER_ROLES = {
   ADMIN: 'ADMIN',
   STAFF: 'STAFF',
+  WAITER: 'WAITER',
   KITCHEN_STAFF: 'KITCHEN_STAFF',
   CUSTOMER: 'CUSTOMER',
 };
@@ -72,6 +73,9 @@ export const NAV_ITEMS = {
     { label: 'Dashboard', path: '/staff/dashboard', icon: 'LayoutDashboard' },
     { label: "Today's Orders", path: '/staff/dashboard', icon: 'ClipboardList' },
   ],
+  WAITER: [
+    { label: 'Orders & Tables', path: '/staff/dashboard', icon: 'ClipboardList' },
+  ],
   KITCHEN_STAFF: [
     { label: 'Kitchen Hub', path: '/staff/dashboard', icon: 'LayoutDashboard' },
     { label: 'Live Orders', path: '/kitchen/orders', icon: 'ClipboardList', disabled: true },
@@ -93,6 +97,7 @@ export const QUICK_LOGIN_ACCOUNTS = {
 export const ROLE_BADGES = {
   ADMIN: 'bg-brand-orange/10 text-brand-orange border-brand-orange/20',
   STAFF: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+  WAITER: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
   KITCHEN_STAFF: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
   CUSTOMER: 'bg-green-500/10 text-green-500 border-green-500/20',
 };
@@ -100,6 +105,7 @@ export const ROLE_BADGES = {
 export const ROLE_REDIRECT = {
   ADMIN: '/admin/dashboard',
   STAFF: '/staff/dashboard',
+  WAITER: '/staff/dashboard',
   KITCHEN_STAFF: '/staff/dashboard',
   CUSTOMER: '/dashboard',
 };
