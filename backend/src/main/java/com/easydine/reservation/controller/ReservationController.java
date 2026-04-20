@@ -42,7 +42,7 @@ public class ReservationController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'KITCHEN_STAFF')")
     public ResponseEntity<ApiResponse<List<ReservationDTO>>> getAllReservations(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) ReservationStatus status) {

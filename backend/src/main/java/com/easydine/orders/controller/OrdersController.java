@@ -1,6 +1,5 @@
 package com.easydine.orders.controller;
 
-<<<<<<< HEAD
 import com.easydine.auth.entity.User;
 import com.easydine.orders.dto.OrderRequest;
 import com.easydine.orders.dto.OrderResponse;
@@ -37,13 +36,4 @@ public class OrdersController {
     public ResponseEntity<List<OrderResponse>> getByReservation(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrdersByReservation(id));
     }
-=======
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-@RequestMapping("/api/orders")
-public class OrdersController {
-    // Skeleton only - implementation pending
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 }

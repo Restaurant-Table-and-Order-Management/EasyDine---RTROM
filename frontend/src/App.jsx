@@ -20,12 +20,9 @@ import TableSearchPage from './features/tables/TableSearchPage';
 import TableManagementPage from './features/tables/TableManagementPage';
 import MyReservationsPage from './features/reservations/MyReservationsPage';
 import AdminReservationsPage from './features/reservations/AdminReservationsPage';
-<<<<<<< HEAD
 import MenuManagementPage from './features/menu/MenuManagementPage';
 import CustomerMenuPage from './features/orders/CustomerMenuPage';
 import OrderTrackingPage from './features/orders/OrderTrackingPage';
-=======
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 
 // Guards
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -112,7 +109,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-<<<<<<< HEAD
             <Route
               path="/admin/menu"
               element={
@@ -121,14 +117,12 @@ function App() {
                 </ProtectedRoute>
               }
             />
-=======
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
 
             {/* STAFF ROUTES */}
             <Route
               path="/staff/dashboard"
               element={
-                <ProtectedRoute requireAuth={true} requiredRole="STAFF">
+                <ProtectedRoute requireAuth={true} requiredRole={['STAFF', 'KITCHEN_STAFF']}>
                   <KitchenDashboard />
                 </ProtectedRoute>
               }
@@ -144,7 +138,6 @@ function App() {
               }
             />
             <Route
-<<<<<<< HEAD
               path="/menu"
               element={
                 <ProtectedRoute requireAuth={true} requiredRole="CUSTOMER">
@@ -153,8 +146,6 @@ function App() {
               }
             />
             <Route
-=======
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
               path="/tables"
               element={
                 <ProtectedRoute requireAuth={true} requiredRole="CUSTOMER">
@@ -170,7 +161,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-<<<<<<< HEAD
             <Route
               path="/order-track/:id"
               element={
@@ -179,8 +169,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-=======
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
           </Route>
 
           {/* Redirects & fallbacks */}

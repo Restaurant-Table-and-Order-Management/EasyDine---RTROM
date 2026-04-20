@@ -24,7 +24,11 @@ export default function ProtectedRoute({
   }
 
   // Role-restricted pages
-  if (requiredRole && user?.role !== requiredRole) {
+  const isAuthorized = Array.isArray(requiredRole) 
+    ? requiredRole.includes(user?.role)
+    : user?.role === requiredRole;
+
+  if (requiredRole && !isAuthorized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-light dark:bg-surface-dark-deep">
         <div className="text-center p-8 bg-white dark:bg-surface-dark rounded-2xl shadow-lg max-w-sm mx-4">

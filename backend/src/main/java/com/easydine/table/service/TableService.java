@@ -1,20 +1,22 @@
 package com.easydine.table.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.easydine.reservation.repository.ReservationRepository;
 import com.easydine.table.dto.TableDTO;
 import com.easydine.table.dto.TableMapper;
 import com.easydine.table.entity.RestaurantTable;
 import com.easydine.table.model.TableStatus;
 import com.easydine.table.repository.RestaurantTableRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -25,17 +27,10 @@ public class TableService {
     private final TableMapper tableMapper;
 
     public List<TableDTO> getAllTables() {
-<<<<<<< HEAD
         boolean isStaffOrAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_STAFF"));
 
         if (isStaffOrAdmin) {
-=======
-        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        if (isAdmin) {
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
             return tableRepository.findAll().stream()
                     .map(tableMapper::toDto)
                     .collect(Collectors.toList());
@@ -88,15 +83,9 @@ public class TableService {
         if (currentStatus == TableStatus.MAINTENANCE && newStatus == TableStatus.AVAILABLE) return;
 
         boolean valid = switch (currentStatus) {
-<<<<<<< HEAD
             case AVAILABLE -> newStatus == TableStatus.RESERVED || newStatus == TableStatus.OCCUPIED;
             case RESERVED -> newStatus == TableStatus.OCCUPIED || newStatus == TableStatus.AVAILABLE;
             case OCCUPIED -> newStatus == TableStatus.AVAILABLE || newStatus == TableStatus.MAINTENANCE;
-=======
-            case AVAILABLE -> newStatus == TableStatus.RESERVED;
-            case RESERVED -> newStatus == TableStatus.OCCUPIED;
-            case OCCUPIED -> newStatus == TableStatus.AVAILABLE;
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
             default -> false;
         };
 

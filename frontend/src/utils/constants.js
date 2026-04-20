@@ -16,6 +16,7 @@ export const RESERVATION_STATUSES = {
 export const USER_ROLES = {
   ADMIN: 'ADMIN',
   STAFF: 'STAFF',
+  KITCHEN_STAFF: 'KITCHEN_STAFF',
   CUSTOMER: 'CUSTOMER',
 };
 
@@ -62,10 +63,7 @@ export const NAV_ITEMS = {
   ADMIN: [
     { label: 'Dashboard', path: '/admin/dashboard', icon: 'LayoutDashboard' },
     { label: 'Table Management', path: '/admin/tables', icon: 'Utensils' },
-<<<<<<< HEAD
     { label: 'Menu Management', path: '/admin/menu', icon: 'ClipboardList' },
-=======
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     { label: 'Reservations', path: '/admin/reservations', icon: 'CalendarCheck' },
     { label: 'Staff Management', path: '#', icon: 'Users', disabled: true },
     { label: 'Settings', path: '#', icon: 'Settings', disabled: true },
@@ -74,12 +72,13 @@ export const NAV_ITEMS = {
     { label: 'Dashboard', path: '/staff/dashboard', icon: 'LayoutDashboard' },
     { label: "Today's Orders", path: '/staff/dashboard', icon: 'ClipboardList' },
   ],
+  KITCHEN_STAFF: [
+    { label: 'Kitchen Hub', path: '/staff/dashboard', icon: 'LayoutDashboard' },
+    { label: 'Live Orders', path: '/kitchen/orders', icon: 'ClipboardList', disabled: true },
+  ],
   CUSTOMER: [
     { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },
-<<<<<<< HEAD
     { label: 'Browse Menu', path: '/menu', icon: 'Utensils' },
-=======
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     { label: 'Find Tables', path: '/tables', icon: 'Search' },
     { label: 'My Reservations', path: '/my-reservations', icon: 'CalendarCheck' },
   ],
@@ -94,11 +93,13 @@ export const QUICK_LOGIN_ACCOUNTS = {
 export const ROLE_BADGES = {
   ADMIN: 'bg-brand-orange/10 text-brand-orange border-brand-orange/20',
   STAFF: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+  KITCHEN_STAFF: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
   CUSTOMER: 'bg-green-500/10 text-green-500 border-green-500/20',
 };
 
 export const ROLE_REDIRECT = {
   ADMIN: '/admin/dashboard',
   STAFF: '/staff/dashboard',
+  KITCHEN_STAFF: '/staff/dashboard',
   CUSTOMER: '/dashboard',
 };

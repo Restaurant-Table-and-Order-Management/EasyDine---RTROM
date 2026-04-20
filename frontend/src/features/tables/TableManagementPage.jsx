@@ -10,11 +10,7 @@ import { TABLE_STATUSES, TABLE_IMAGES, TABLE_LOCATIONS, STATUS_DOT_COLORS } from
 import toast from 'react-hot-toast';
 
 export default function TableManagementPage() {
-<<<<<<< HEAD
   const { tables, tablesLoading, fetchTables, updateTableStatus, deleteTable } = useDataStore();
-=======
-  const { tables, tablesLoading, fetchTables, updateTableStatus } = useDataStore();
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [statusMenuOpen, setStatusMenuOpen] = useState(null);
   
@@ -43,7 +39,6 @@ export default function TableManagementPage() {
     }
   };
 
-<<<<<<< HEAD
   const handleDeleteTable = async (tableId) => {
     if (!window.confirm("Are you sure you want to delete this table?")) return;
     const loadingToast = toast.loading('Deleting table...');
@@ -54,9 +49,6 @@ export default function TableManagementPage() {
       toast.error(result.message, { id: loadingToast });
     }
   };
-
-=======
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   const statusOptions = Object.values(TABLE_STATUSES);
 
   const clearFilters = () => {
@@ -228,15 +220,9 @@ export default function TableManagementPage() {
               {filteredTables.map((table) => {
                 const imageIndex = (table.id || 0) % TABLE_IMAGES.length;
                 return (
-<<<<<<< HEAD
                   <Card key={table.id} padding="p-0" className={`group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-800 rounded-2xl ${statusMenuOpen === table.id ? 'relative z-50' : 'relative z-10'}`}>
                     {/* Image header */}
                     <div className="relative h-36 overflow-hidden rounded-t-2xl">
-=======
-                  <Card key={table.id} padding="p-0" className="overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-800">
-                    {/* Image header */}
-                    <div className="relative h-36 overflow-hidden">
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
                       <img src={TABLE_IMAGES[imageIndex]} alt={`Table ${table.tableNumber}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                       <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent" />
                       
@@ -259,11 +245,7 @@ export default function TableManagementPage() {
                       </div>
                     </div>
     
-<<<<<<< HEAD
                     <div className="p-4 bg-white dark:bg-surface-dark rounded-b-2xl">
-=======
-                    <div className="p-4 bg-white dark:bg-surface-dark">
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
                       
                       {/* Custom Status Dropdown */}
                       <div className="relative mt-1">
@@ -306,11 +288,7 @@ export default function TableManagementPage() {
                           <span className="text-xs text-gray-500 font-medium">Quick Actions</span>
                           <div className="flex gap-2">
                              <button className="p-1.5 text-gray-400 hover:text-brand-orange transition-colors"><Edit2 className="w-4 h-4" /></button>
-<<<<<<< HEAD
                              <button onClick={() => handleDeleteTable(table.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
-=======
-                             <button className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
                           </div>
                       </div>
                       
@@ -348,11 +326,7 @@ export default function TableManagementPage() {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <button className="p-1.5 text-gray-400 hover:text-brand-orange transition-colors" title="Edit"><Edit2 className="w-4 h-4" /></button>
-<<<<<<< HEAD
-                                            <button onClick={() => handleDeleteTable(table.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
-=======
-                                            <button className="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
+                                             <button onClick={() => handleDeleteTable(table.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
                                         </div>
                                     </td>
                                 </tr>

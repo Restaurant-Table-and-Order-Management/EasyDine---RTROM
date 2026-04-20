@@ -1,22 +1,11 @@
 spring:
-<<<<<<< HEAD
-=======
-  config:
-    import: optional:file:../.env[.properties]
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   application:
     name: easydine
 
   datasource:
-<<<<<<< HEAD
-    url: jdbc:mysql://localhost:3306/rtrom?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: root
-    password: your password
-=======
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -40,11 +29,7 @@ server:
     context-path: /api
 
 jwt:
-<<<<<<< HEAD
-  secret: b7f9c2e8a1d34f6c9e0b2a7d5f8c3e6a1b9d4f7c2e8a6b3d5f1c9a7e2d4b6f8
-=======
   secret: ${JWT_SECRET}
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
   expiration: 86400000 # 24 hours in milliseconds
   refresh-expiration: 604800000 # 7 days in milliseconds
 
