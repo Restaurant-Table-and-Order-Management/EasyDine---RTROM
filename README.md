@@ -1,83 +1,75 @@
-<<<<<<< HEAD
-# EasyDine - RTROM (Restaurant Table Reservation and Order Management)
-
-A full-stack web application designed for restaurant digital operations, enabling real-time table management, order tracking, and menu customization.
-
-## Features
-- Interactive Table Reservation system
-- Real-time Order Management with cart and tracking
-- Comprehensive Menu administration
-- Secure Role-Based Authentication
-
-## Tech Stack
-- **Frontend:** React JS, Vite, Zustand, Tailwind CSS
-- **Backend:** Java Spring Boot, Spring Security, Hibernate ORM
-- **Database:** MySQL
-=======
 # 🍽️ EasyDine: RTROM System
+**Restaurant Table Reservation and Order Management**
 
-**R**estaurant **T**able **R**eservation and **O**rder **M**anagement system.
-
----
-
-## ✅ WHAT'S DONE
-
-### 🏗️ Backend (Epic 1 Complete)
-- **Security**: Production-grade JWT Auth with role-based access control (ADMIN/CUSTOMER).
-- **Inventory**: Managed Table Inventory with `RestaurantTable` entity (renamed to avoid SQL conflicts).
-- **Logic**: Intelligent Reservation Engine with **Time-Space Collision Detection** (no double-bookings).
-- **States**: Automated Status Machine (`AVAILABLE` → `RESERVED` → `OCCUPIED`).
-- **Clean Architecture**: Standardized DTOs, manual Mappers, and Global Exception Handling.
-
-### 📋 Planning
-- **Detailed Frontend Plan**: [frontend_development_plan.md](./frontend_development_plan.md)
-- **API Reference Guide**: [api_reference_guide.md](./api_reference_guide.md)
-
-### 🎨 Frontend (Foundation Ready)
-- **Landing Page**: Professional hero-section and feature highlights implemented.
-- **Auth Module**: Fully functional `LoginPage` and `RegisterPage` integrated with backend signatures.
-- **Vite Setup**: Performance-optimized React + Vite project structure.
+EasyDine is a professional full-stack platform designed to modernize restaurant operations. It bridges the gap between customer convenience and kitchen efficiency through a unified, role-based ecosystem.
 
 ---
 
-## 🛠️ PROJECT ROADMAP
+## 🚀 CURRENT PROJECT STATUS
+**Version: 0.8.0-beta** (Enterprise Auth & Orders Integrated)
 
-### 🎨 Epic 1: Table Inventory & Reservation (Frontend)
-- [/] **Refine UI/UX**: Polish Landing, Login, and Signup pages (Assignee).
-- [ ] **Discovery**: Implement Date/Time/Capacity search for tables.
-- [ ] **Booking**: Create the reservation submission flow.
-- [ ] **Admin**: Dashboard for managing table status and confirming bookings.
-
-### 🍱 Epic 2: Online Ordering & Menu Management
-- [ ] **Menu CRUD**: Build categories (Starters, Mains, Drinks) and Item management.
-- [ ] **Digital Menu**: Interactive menu browsing for customers.
-- [ ] **Cart & Order**: Implement cart logic and "Place Order" flow.
-
-### 👨‍🍳 Epic 3: Kitchen Order Management & Tracking
-- [ ] **Kitchen Display (KDS)**: Real-time dashboard for chefs to view pending orders.
-- [ ] **Order Tracking**: Status updates (Preparing → Ready → Served).
-- [ ] **Notifications**: Real-time alerts for customers when food is ready.
-
-### 💳 Epic 4: Billing & Payment Integration
-- [ ] **Bill Generation**: Automated calculation of totals, taxes, and service charges.
-- [ ] **Payments**: Integration with payment gateways (Simulation/Stripe/Razorpay).
-- [ ] **History**: User order history and digital receipts.
+### ✅ What's Implemented
+- **Advanced Auth**: Production-grade JWT Authentication with **Role-Based Access Control** (Admin, Customer, kitchen Staff).
+- **Table Logic**: Intelligent Table Inventory with **Time-Space Collision Detection** for reservations.
+- **Menu Management**: Full CRUD operations for menu items with categories and availability toggles.
+- **Live Ordering**: Functional Shopping Cart with session-based order placement (`POST /api/orders`).
+- **Staff Hub**: Unified dashboard for managing live floor status and reservations.
+- **Persistence**: Zustand state persistence across page refreshes.
 
 ---
 
-## 🚀 How to Run
+## 🛠️ TECH STACK
+- **Frontend**: React 18, Vite, Tailwind CSS, Zustand, Lucide Icons.
+- **Backend**: Spring Boot 3.x, Spring Security (JWT), Hibernate/JPA.
+- **Database**: MySQL (Relational Schema).
+- **Communication**: RESTful API with Axios Interceptors.
 
-### Backend
-1. Ensure MySQL is running and DB `easydine` is created.
-2. Navigate to `/backend`.
-3. Run `mvn spring-boot:run` (or use your IDE launcher).
+---
 
-### Frontend
+## 🗺️ PROJECT ROADMAP
+
+### 🟢 Epic 1: Table Inventory & Reservation (STABLE)
+- [x] Intelligent Date/Time/Capacity search.
+- [x] Booking submission and management.
+- [x] Admin table status control.
+
+### 🟢 Epic 2: Online Ordering & Menu Management (STABLE)
+- [x] Menu Item CRUD (Admin).
+- [x] Category filtering and search.
+- [x] Shopping Cart and Order placement.
+
+### 🟡 Epic 3: Kitchen Display & Order Fulfillment (IN PROGRESS)
+- [x] Unified Staff Dashboard.
+- [x] Live Session Tracking (Order history for active tables).
+- [ ] Live Order Fulfillment (Pending -> Preparing -> Served status machine).
+
+### ⚪ Epic 4: Billing & Analytics (PLANNED)
+- [ ] Automated Bill Generation.
+- [ ] Payment Gateway integration (Mock/Stripe).
+- [ ] Sales and Occupancy Analytics.
+
+---
+
+## ⚙️ HOW TO RUN
+
+### Prerequisites
+- JDK 17+
+- Node.js 18+
+- MySQL Server
+
+### 1. Backend Setup
+1. Navigate to `/backend`.
+2. Configure `application.yml` or `.env` with your DB credentials.
+3. Run: `./mvnw spring-boot:run`
+
+### 2. Frontend Setup
 1. Navigate to `/frontend`.
-2. Run `npm install`.
-3. Run `npm run dev`.
+2. Run: `npm install`
+3. Run: `npm run dev`
+4. Access at: `http://localhost:5173`
 
 ---
 
-**Current Version**: 0.1.0-alpha (Epic 1 Stable)
->>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
+**Documentation:**
+- [API Reference Guide](./api_reference_guide.md)
+- [Visual Project Structure](./VISUAL_STRUCTURE.md)
