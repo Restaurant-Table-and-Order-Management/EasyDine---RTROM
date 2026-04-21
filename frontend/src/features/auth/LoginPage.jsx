@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ChefHat, ArrowRight, LayoutDashboard, Clock } from 'lucide-react';
+import { Mail, Lock, ChefHat, ArrowRight } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -62,35 +62,18 @@ export default function LoginPage() {
             Manage your restaurant reservations with ease. Smart table management, seamless bookings, happy guests.
           </p>
 
-          <div className="space-y-6 pt-10 border-t border-white/20 text-left">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                <LayoutDashboard className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white">Smart Table Mapping</h3>
-                <p className="text-sm text-white/70">Interactive floor plans to optimize seating and maximize turnover.</p>
-              </div>
+          <div className="grid grid-cols-3 gap-6 pt-10 border-t border-white/20">
+            <div>
+              <p className="text-3xl font-bold mb-1">500+</p>
+              <p className="text-sm text-white/70">Restaurants</p>
             </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                <ChefHat className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white">Live Kitchen Sync</h3>
-                <p className="text-sm text-white/70">Real-time order tracking from the first prep to the final service.</p>
-              </div>
+            <div>
+              <p className="text-3xl font-bold mb-1">10K+</p>
+              <p className="text-sm text-white/70">Reservations</p>
             </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                <Clock className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white">One-Tap Reservation</h3>
-                <p className="text-sm text-white/70">Seamless booking experience for your regular and walk-in guests.</p>
-              </div>
+            <div>
+              <p className="text-3xl font-bold mb-1">99%</p>
+              <p className="text-sm text-white/70">Satisfaction</p>
             </div>
           </div>
         </div>

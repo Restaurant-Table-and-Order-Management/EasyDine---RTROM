@@ -1,67 +1,165 @@
-# EasyDine API Reference Guide
+<<<<<<< HEAD
+# API Reference Guide
 
-Base URL: `http://localhost:8080/api`
+## Base URL
+`/api`
+
+## Authentication
+`POST /auth/login` - Authenticate users  
+`POST /auth/register` - Register new user  
+
+## Tables
+`GET /tables` - Fetch all tables in system  
+`POST /tables` - Create a new table  
+`PUT /tables/{id}/status` - Update table status  
+`DELETE /tables/{id}` - Delete a table  
+
+## Orders
+`GET /orders` - Fetch orders  
+`POST /orders` - Place a new order  
+`PUT /orders/{id}/status` - Update order progression status  
+
+## Menu
+`GET /menu` - Fetch all menu items  
+`POST /menu` - Add a new menu item  
+`PUT /menu/{id}` - Modify existing menu item  
+`DELETE /menu/{id}` - Remove menu item
+=======
+# 📖 EasyDine Backend API Reference
+
+This guide provides the exact specifications for all backend APIs currently implemented in the EasyDine project. Use this for Axios service layer development.
 
 ---
 
-## 🔐 Authentication
-| Endpoint | Method | Description | Payload |
-| :--- | :--- | :--- | :--- |
-| `/auth/signup` | `POST` | Register a new user | `{ name, email, password, role }` |
-| `/auth/login` | `POST` | Get JWT token | `{ email, password }` |
+## 🛠️ Global Specifications
 
-*Note: Roles supported are `CUSTOMER`, `ADMIN`, `KITCHEN_STAFF`.*
+- **Base URL**: `http://localhost:8080/api`
+- **Content-Type**: `application/json`
+- **Auth Header**: `Authorization: Bearer <jwt_token>` (Required for all except `/auth/**`)
+- **Global Response Envelope**:
+  ```json
+  {
+    "success": true, 
+    "message": "Operation description",
+    "data": { ... } 
+  }
+  ```
 
 ---
 
-## 🛋️ Tables
-| Endpoint | Method | Description |
+## 🔐 1. Authentication APIs (`/auth`)
+
+### Signup
+- **Endpoint**: `/auth/signup`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123"
+  }
+  ```
+- **Response `data`**: `{ "token": "...", "user": { "id": 1, "email": "...", "name": "...", "role": "CUSTOMER" } }`
+
+### Login
+- **Endpoint**: `/auth/login`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "email": "john@example.com",
+    "password": "password123"
+  }
+  ```
+- **Response `data`**: Same as Signup.
+
+---
+
+## 🍽️ 2. Table Management APIs (`/tables`)
+
+### List Tables
+- **Endpoint**: `/tables`
+- **Method**: `GET`
+- **Privacy**: Role-dependent inside backend.
+- **Response `data`**: Array of `TableDTO`.
+
+### Search Available Tables
+- **Endpoint**: `/tables/available`
+- **Method**: `GET`
+- **Params**: `date` (YYYY-MM-DD), `time` (HH:mm:ss), `capacity` (Integer)
+- **Response `data`**: Array of `TableDTO` that are free for that slot.
+
+### Create Table (ADMIN Only)
+- **Endpoint**: `/tables`
+- **Method**: `POST`
+- **Body**: `{ "tableNumber": "T1", "capacity": 4, "location": "Window", "floorNumber": 1 }`
+
+### Update Table Status (ADMIN Only)
+- **Endpoint**: `/tables/{id}/status`
+- **Method**: `PATCH`
+- **Params**: `status` (String: AVAILABLE, RESERVED, OCCUPIED, MAINTENANCE)
+
+---
+
+## 📅 3. Reservation APIs (`/reservations`)
+
+### Create Reservation
+- **Endpoint**: `/reservations`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "tableId": 1,
+    "reservationDate": "2026-10-25",
+    "startTime": "18:00:00",
+    "endTime": "20:00:00",
+    "guestCount": 4,
+    "specialRequests": "Birthday cake preferred"
+  }
+  ```
+
+### View My Reservations (CUSTOMER Only)
+- **Endpoint**: `/reservations/my`
+- **Method**: `GET`
+- **Response `data`**: Array of `ReservationDTO`.
+
+### View All Reservations (ADMIN Only)
+- **Endpoint**: `/reservations`
+- **Method**: `GET`
+- **Params (Optional)**: `date`, `status`
+- **Response `data`**: Comprehensive list of all bookings.
+
+### Confirm Reservation (ADMIN Only)
+- **Endpoint**: `/reservations/{id}/confirm`
+- **Method**: `PUT`
+
+### Cancel Reservation
+- **Endpoint**: `/reservations/{id}/cancel`
+- **Method**: `PUT`
+
+---
+
+## 🏗️ Data Models (DTOs)
+
+### `TableDTO`
+| Field | Type | Description |
 | :--- | :--- | :--- |
-| `/tables` | `GET` | List all tables. |
-| `/tables` | `POST` | [Admin] Create a new table. |
-| `/tables/available`| `GET` | Search tables by date, time, and capacity. |
-| `/tables/{id}/status`| `PATCH` | Update status (params: `status`). |
-| `/tables/{id}` | `DELETE`| [Admin] Delete a table. |
+| `id` | Long | Unique Identifier |
+| `tableNumber`| String | e.g. "A101" |
+| `capacity` | Integer | Max guests |
+| `status` | Enum | AVAILABLE, RESERVED, etc. |
+| `location` | String | e.g. "Garden", "VIP" |
+| `floorNumber`| Integer | 1, 2, or 3 |
 
----
-
-## 📅 Reservations
-| Endpoint | Method | Description |
+### `ReservationDTO`
+| Field | Type | Description |
 | :--- | :--- | :--- |
-| `/reservations` | `POST` | Create a new booking for a table. |
-| `/reservations/my` | `GET` | List current user's reservations. |
-| `/reservations` | `GET` | [Admin] List all reservations (filter by status). |
-| `/reservations/{id}`| `GET` | Get details for a specific reservation. |
-| `/reservations/{id}/confirm`| `PUT` | [Admin] Confirm a pending booking. |
-
----
-
-## 🥐 Menu
-| Endpoint | Method | Description |
-| :--- | :--- | :--- |
-| `/menu` | `GET` | Fetch entire categorized menu. |
-| `/menu` | `POST` | [Admin] Create a new menu item. |
-| `/menu/{id}` | `PUT` | [Admin] Update item price/availability/details. |
-| `/menu/{id}` | `DELETE`| [Admin] Remove an item from the menu. |
-
----
-
-## 🛒 Orders
-| Endpoint | Method | Description |
-| :--- | :--- | :--- |
-| `/orders` | `POST` | Place a new food order for a reservation session. |
-| `/orders/my` | `GET` | Get current user's order history. |
-| `/orders/reservation/{id}`| `GET` | Get all orders associated with a specific visit. |
-
----
-
-## 📜 Unified Response Format
-All successful responses return:
-```json
-{
-  "success": true,
-  "message": "User-friendly message",
-  "data": { ... }
-}
-```
-Errors return `success: false` with appropriate HTTP status codes.
+| `id` | Long | Unique Identifier |
+| `userId`/`userName`| Mixed | Linking to the customer |
+| `tableId`/`tableNumber`| Mixed | Linking to the physical table |
+| `reservationDate`| LocalDate | YYYY-MM-DD |
+| `startTime`| LocalTime | HH:mm:ss |
+| `status` | Enum | PENDING, CONFIRMED, CANCELLED |
+| `guestCount` | Integer | Number of guests |
+>>>>>>> 7fb00877791e8f1b2561430cfe5fc479d2029c77
