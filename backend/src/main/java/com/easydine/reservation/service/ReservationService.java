@@ -100,6 +100,25 @@ public class ReservationService {
     }
 
     @Transactional
+    public ReservationDTO checkInGuest(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new RuntimeException("Only CONFIRMED reservations can be checked in");
+        }
+
+        // Table becomes OCCUPIED
+        RestaurantTable table = reservation.getTable();
+        if (table != null) {
+            table.setStatus(TableStatus.OCCUPIED);
+            tableRepository.save(table);
+        }
+
+        return reservationMapper.toDto(reservation);
+    }
+
+    @Transactional
     public ReservationDTO cancelReservation(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));

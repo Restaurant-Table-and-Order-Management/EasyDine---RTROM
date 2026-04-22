@@ -16,4 +16,5 @@ public class OrderRequest {
     private List<OrderItemRequest> items;
 
     private Long reservationId;
+    private String paymentMethod;
 }

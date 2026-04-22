@@ -179,7 +179,7 @@ export default function MenuManagementPage() {
                       <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
                           <div>
                               <p className="text-xl font-bold text-white leading-tight mb-1">{item.name}</p>
-                              <p className="text-lg font-black text-brand-orange">${parseFloat(item.price).toFixed(2)}</p>
+                              <p className="text-lg font-black text-brand-orange">₹{parseFloat(item.price).toFixed(2)}</p>
                           </div>
                       </div>
                     </div>
@@ -234,7 +234,7 @@ export default function MenuManagementPage() {
                                       </div>
                                     </td>
                                     <td className="px-6 py-4"><span className="text-gray-500 text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md font-medium">{item.category}</span></td>
-                                    <td className="px-6 py-4 font-bold text-gray-700 dark:text-gray-200">${item.price.toFixed(2)}</td>
+                                    <td className="px-6 py-4 font-bold text-gray-700 dark:text-gray-200">₹{item.price.toFixed(2)}</td>
                                     <td className="px-6 py-4">
                                       {item.available ? (
                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400">

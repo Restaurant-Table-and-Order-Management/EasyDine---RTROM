@@ -17,6 +17,7 @@ public class ReservationMapperImpl implements ReservationMapper {
                 .userName(entity.getUser() != null ? entity.getUser().getName() : null)
                 .tableId(entity.getTable() != null ? entity.getTable().getId() : null)
                 .tableNumber(entity.getTable() != null ? entity.getTable().getTableNumber() : null)
+                .tableLocation(entity.getTable() != null ? entity.getTable().getLocation() : null)
                 .reservationDate(entity.getReservationDate())
                 .startTime(entity.getStartTime())
                 .endTime(entity.getEndTime())

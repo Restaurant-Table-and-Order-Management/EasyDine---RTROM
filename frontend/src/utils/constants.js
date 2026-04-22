@@ -13,6 +13,15 @@ export const RESERVATION_STATUSES = {
   CANCELLED: 'CANCELLED',
 };
 
+export const ORDER_STATUSES = {
+  PENDING: 'PENDING',
+  PLACED: 'PLACED',
+  IN_KITCHEN: 'IN_KITCHEN',
+  READY: 'READY',
+  SERVED: 'SERVED',
+  CANCELLED: 'CANCELLED',
+};
+
 export const USER_ROLES = {
   ADMIN: 'ADMIN',
   STAFF: 'STAFF',
@@ -39,6 +48,13 @@ export const STATUS_COLORS = {
   PENDING: 'bg-status-pending/10 text-status-pending border-status-pending/20',
   CONFIRMED: 'bg-status-confirmed/10 text-status-confirmed border-status-confirmed/20',
   CANCELLED: 'bg-status-cancelled/10 text-status-cancelled border-status-cancelled/20',
+  
+  // Order specific
+  PENDING: 'bg-gray-100 text-gray-500 border-gray-200',
+  PLACED: 'bg-blue-500/10 text-blue-600 border-blue-200',
+  IN_KITCHEN: 'bg-brand-orange/10 text-brand-orange border-brand-orange/20',
+  READY: 'bg-green-500/10 text-green-600 border-green-200',
+  SERVED: 'bg-gray-100 text-gray-500 border-gray-200',
 };
 
 export const STATUS_DOT_COLORS = {
@@ -49,6 +65,10 @@ export const STATUS_DOT_COLORS = {
   PENDING: 'bg-status-pending',
   CONFIRMED: 'bg-status-confirmed',
   CANCELLED: 'bg-status-cancelled',
+  PLACED: 'bg-blue-500',
+  IN_KITCHEN: 'bg-brand-orange',
+  READY: 'bg-green-500',
+  SERVED: 'bg-gray-400',
 };
 
 export const TABLE_IMAGES = [
@@ -66,8 +86,6 @@ export const NAV_ITEMS = {
     { label: 'Table Management', path: '/admin/tables', icon: 'Utensils' },
     { label: 'Menu Management', path: '/admin/menu', icon: 'ClipboardList' },
     { label: 'Reservations', path: '/admin/reservations', icon: 'CalendarCheck' },
-    { label: 'Staff Management', path: '#', icon: 'Users', disabled: true },
-    { label: 'Settings', path: '#', icon: 'Settings', disabled: true },
   ],
   STAFF: [
     { label: 'Dashboard', path: '/staff/dashboard', icon: 'LayoutDashboard' },
@@ -78,13 +96,14 @@ export const NAV_ITEMS = {
   ],
   KITCHEN_STAFF: [
     { label: 'Kitchen Hub', path: '/staff/dashboard', icon: 'LayoutDashboard' },
-    { label: 'Live Orders', path: '/kitchen/orders', icon: 'ClipboardList', disabled: true },
+    { label: 'Live Orders', path: '/kitchen/orders', icon: 'ClipboardList' },
   ],
   CUSTOMER: [
     { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },
     { label: 'Browse Menu', path: '/menu', icon: 'Utensils' },
     { label: 'Find Tables', path: '/tables', icon: 'Search' },
     { label: 'My Reservations', path: '/my-reservations', icon: 'CalendarCheck' },
+    { label: 'My Order', path: '/my-orders', icon: 'ShoppingBag' },
   ],
 };
 
@@ -105,7 +124,7 @@ export const ROLE_BADGES = {
 export const ROLE_REDIRECT = {
   ADMIN: '/admin/dashboard',
   STAFF: '/staff/dashboard',
-  WAITER: '/staff/dashboard',
+  WAITER: '/waiter/dashboard',
   KITCHEN_STAFF: '/staff/dashboard',
   CUSTOMER: '/dashboard',
 };

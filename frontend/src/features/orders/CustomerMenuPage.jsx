@@ -41,7 +41,7 @@ export default function CustomerMenuPage() {
   const filteredItems = menuItems.filter(item => {
     const matchesCategory = activeCategory === 'ALL' || item.category === activeCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDietary = !vegOnly || item.isVegetarian;
+    const matchesDietary = !vegOnly || item.vegetarian || item.isVegetarian;
     return matchesCategory && matchesSearch && matchesDietary;
   });
 
@@ -165,7 +165,7 @@ export default function CustomerMenuPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 
                 <div className="absolute top-3 left-3 flex flex-col gap-2">
-                  {item.isPopular && (
+                  {(item.popular || item.isPopular) && (
                     <div className="px-2 py-1 bg-brand-gold text-white text-[10px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1 shadow-lg border border-white/20">
                       <Flame className="w-3 h-3 fill-white" /> Popular
                     </div>
@@ -199,7 +199,7 @@ export default function CustomerMenuPage() {
                     {item.name}
                   </h3>
                   <span className="text-lg font-black text-gray-900 dark:text-white">
-                    ${parseFloat(item.price).toFixed(2)}
+                    ₹{parseFloat(item.price).toFixed(2)}
                   </span>
                 </div>
                 
@@ -209,8 +209,8 @@ export default function CustomerMenuPage() {
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-800 mt-auto">
                    <div className="flex items-center gap-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    <span className={`w-3 h-3 rounded-sm border ${item.isVegetarian ? 'border-green-500 flex items-center justify-center' : 'border-red-500 flex items-center justify-center'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${item.isVegetarian ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                    <span className={`w-3 h-3 rounded-sm border ${item.vegetarian ? 'border-green-500 flex items-center justify-center' : 'border-red-500 flex items-center justify-center'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${item.vegetarian ? 'bg-green-500' : 'bg-red-500'}`}></span>
                     </span>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 15-20 min</span>
                   </div>
@@ -243,7 +243,7 @@ export default function CustomerMenuPage() {
                 <div className="flex justify-between items-start mb-4">
                    <div>
                       <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-1">{selectedItem.name}</h2>
-                      <p className="text-brand-orange font-black text-xl">${selectedItem.price.toFixed(2)}</p>
+                      <p className="text-brand-orange font-black text-xl">₹{selectedItem.price.toFixed(2)}</p>
                    </div>
                    <div className="flex items-center bg-gray-50 dark:bg-gray-800 rounded-2xl p-1.5 border border-gray-100 dark:border-gray-700">
                       <button 
@@ -293,7 +293,7 @@ export default function CustomerMenuPage() {
                   }`}
                 >
                    {selectedItem.available 
-                    ? `Add to Cart — $${(selectedItem.price * quantity).toFixed(2)}` 
+                    ? `Add to Cart — ₹${(selectedItem.price * quantity).toFixed(2)}` 
                     : 'Currently Unavailable'}
                 </Button>
              </div>

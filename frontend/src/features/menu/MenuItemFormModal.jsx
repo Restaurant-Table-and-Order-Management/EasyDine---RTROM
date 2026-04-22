@@ -18,8 +18,8 @@ export default function MenuItemFormModal({ isOpen, onClose, editingItem }) {
     category: 'MAINS',
     available: true,
     special: false,
-    isVegetarian: false,
-    isPopular: false
+    vegetarian: false,
+    popular: false
   });
 
   useEffect(() => {
@@ -32,8 +32,8 @@ export default function MenuItemFormModal({ isOpen, onClose, editingItem }) {
         category: editingItem.category || 'MAINS',
         available: editingItem.available !== undefined ? editingItem.available : true,
         special: editingItem.special !== undefined ? editingItem.special : false,
-        isVegetarian: editingItem.isVegetarian !== undefined ? editingItem.isVegetarian : false,
-        isPopular: editingItem.isPopular !== undefined ? editingItem.isPopular : false
+        vegetarian: editingItem.vegetarian !== undefined ? editingItem.vegetarian : (editingItem.isVegetarian !== undefined ? editingItem.isVegetarian : false),
+        popular: editingItem.popular !== undefined ? editingItem.popular : (editingItem.isPopular !== undefined ? editingItem.isPopular : false)
       });
     } else {
       setFormData({
@@ -44,8 +44,8 @@ export default function MenuItemFormModal({ isOpen, onClose, editingItem }) {
         category: 'MAINS',
         available: true,
         special: false,
-        isVegetarian: false,
-        isPopular: false
+        vegetarian: false,
+        popular: false
       });
     }
   }, [editingItem, isOpen]);
@@ -134,7 +134,7 @@ export default function MenuItemFormModal({ isOpen, onClose, editingItem }) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Price ($) *
+                  Price (₹) *
                 </label>
                 <input
                   type="number"
@@ -240,8 +240,8 @@ export default function MenuItemFormModal({ isOpen, onClose, editingItem }) {
                 <div className="relative flex items-center">
                   <input
                     type="checkbox"
-                    name="isVegetarian"
-                    checked={formData.isVegetarian}
+                    name="vegetarian"
+                    checked={formData.vegetarian}
                     onChange={handleChange}
                     className="sr-only peer"
                   />
@@ -257,8 +257,8 @@ export default function MenuItemFormModal({ isOpen, onClose, editingItem }) {
                 <div className="relative flex items-center">
                   <input
                     type="checkbox"
-                    name="isPopular"
-                    checked={formData.isPopular}
+                    name="popular"
+                    checked={formData.popular}
                     onChange={handleChange}
                     className="sr-only peer"
                   />

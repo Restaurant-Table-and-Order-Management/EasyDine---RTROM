@@ -9,12 +9,15 @@ export default function ReservationCard({
   reservation,
   onCancel,
   onConfirm,
+  onCheckIn,
   showCustomerName = false,
   showActions = true,
+  isAdminView = false,
 }) {
   const canCancel =
     reservation.status === 'PENDING' || reservation.status === 'CONFIRMED';
   const canConfirm = reservation.status === 'PENDING';
+  const canCheckIn = isAdminView && reservation.status === 'CONFIRMED';
 
   const handleCancel = () => {
     if (window.confirm('Are you sure you want to cancel this reservation?')) {
@@ -87,6 +90,16 @@ export default function ReservationCard({
                 onClick={() => onConfirm(reservation.id)}
               >
                 Confirm
+              </Button>
+            )}
+            {canCheckIn && onCheckIn && (
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-brand-orange hover:bg-brand-gold border-0"
+                onClick={() => onCheckIn(reservation.id)}
+              >
+                Check In
               </Button>
             )}
             {canCancel && onCancel && (

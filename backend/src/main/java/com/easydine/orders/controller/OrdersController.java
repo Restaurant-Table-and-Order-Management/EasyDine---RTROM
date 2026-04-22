@@ -36,4 +36,19 @@ public class OrdersController {
     public ResponseEntity<List<OrderResponse>> getByReservation(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrdersByReservation(id));
     }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<OrderResponse> updateStatus(
+            @PathVariable Long id,
+            @RequestParam com.easydine.orders.entity.OrderStatus status,
+            @RequestParam(required = false) Integer estimatedMinutes) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(id, status, estimatedMinutes));
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<OrderResponse> cancelOrder(
+            @PathVariable Long id,
+            @RequestParam String reason) {
+        return ResponseEntity.ok(orderService.cancelOrder(id, reason));
+    }
 }

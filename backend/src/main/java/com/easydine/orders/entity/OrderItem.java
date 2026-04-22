@@ -34,6 +34,6 @@ public class OrderItem {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal priceAtTimeOfOrder;
 
-    @Column(length = 500)
+    @Column(length = 1000)
     private String specialInstructions;
 }

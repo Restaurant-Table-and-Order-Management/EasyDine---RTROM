@@ -10,6 +10,9 @@ import {
   Users,
   Activity,
   Plus,
+  DollarSign,
+  Wallet,
+  Receipt,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
@@ -29,21 +32,38 @@ export default function AdminDashboard() {
     tables,
     tablesLoading,
     fetchTables,
+    fetchRevenueReport,
+    activeOrders,
+    fetchActiveOrders
   } = useDataStore();
+  
+  const [revenueData, setRevenueData] = useState(null);
   const navigate = useNavigate();
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    fetchAllReservations('', 'ALL');
-    fetchTables();
+    const refreshData = async () => {
+      fetchAllReservations('', 'ALL');
+      fetchTables();
+      fetchActiveOrders();
+      const res = await fetchRevenueReport();
+      if (res.success) setRevenueData(res.data);
+    };
+
+    refreshData();
+
+    const dataInterval = setInterval(refreshData, 15000); // Poll every 15s
 
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // update every minute
+    }, 60000); // update clock every minute
 
-    return () => clearInterval(timer);
-  }, [fetchAllReservations, fetchTables]);
+    return () => {
+      clearInterval(dataInterval);
+      clearInterval(timer);
+    };
+  }, [fetchAllReservations, fetchTables, fetchRevenueReport, fetchActiveOrders]);
 
   const getGreeting = () => {
     const hour = currentTime.getHours();
@@ -61,9 +81,6 @@ export default function AdminDashboard() {
   const totalTables = tables.length;
   const occupiedTables = tables.filter((t) => t.status === 'OCCUPIED').length;
   const availableTables = tables.filter((t) => t.status === 'AVAILABLE').length;
-
-  // Mock revenue for today based on confirmed/occupied past/present
-  const mockRevenue = todaysReservations.filter(r => r.status === 'CONFIRMED' || r.status === 'COMPLETED').length * 45;
 
   const isLoading = reservationsLoading || tablesLoading;
 
@@ -177,7 +194,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Today's Revenue</p>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">${mockRevenue}</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">₹{revenueData?.totalRevenue?.toFixed(2) || '0.00'}</p>
                   <span className="text-xs font-semibold text-green-500 flex items-center">
                     ↑ 12%
                   </span>
@@ -199,6 +216,134 @@ export default function AdminDashboard() {
             </div>
           </Card>
         </div>
+
+        {/* Financial Highlights */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-3xl shadow-xl shadow-green-500/20 text-white relative overflow-hidden group">
+                 <div className="relative z-10">
+                    <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Revenue Today</p>
+                    <h3 className="text-3xl font-black">₹{revenueData?.totalRevenue?.toFixed(2) || '0.00'}</h3>
+                    <div className="flex items-center gap-2 mt-4 text-[10px] font-bold bg-white/10 w-fit px-2 py-1 rounded-full">
+                        <TrendingUp className="w-3 h-3" /> 12% increase from yesterday
+                    </div>
+                 </div>
+                 <DollarSign className="absolute -right-4 -bottom-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500" />
+            </div>
+
+            <div className="bg-white dark:bg-surface-dark p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Average Ticket</p>
+                    <h3 className="text-3xl font-black text-gray-900 dark:text-white">₹{revenueData?.averageOrderValue?.toFixed(2) || '0.00'}</h3>
+                </div>
+                <div className="flex items-center gap-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    <Activity className="w-4 h-4 text-blue-500" />
+                    <span>Based on {revenueData?.totalOrders || 0} Settlement Transactions</span>
+                </div>
+            </div>
+
+            <div 
+              onClick={() => navigate('/admin/billing')}
+              className="bg-white dark:bg-surface-dark p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between cursor-pointer hover:border-brand-orange transition-all group"
+            >
+                <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Audit Ledger</p>
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-brand-orange transition-colors uppercase tracking-tighter">Finance Control</h3>
+                </div>
+                <div className="flex items-center gap-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    <Receipt className="w-4 h-4 text-brand-orange" />
+                    <span>Manage Refunds & Exports</span>
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-surface-dark p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Simulated Tax Flow</p>
+                    <h3 className="text-3xl font-black text-gray-900 dark:text-white">₹{revenueData?.totalTax?.toFixed(2) || '0.00'}</h3>
+                </div>
+                <div className="flex items-center gap-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    <Wallet className="w-4 h-4 text-purple-500" />
+                    <span>Calculated at 5% GST</span>
+                </div>
+            </div>
+        </div>
+
+        {/* Live Kitchen Monitor */}
+        <Card className="p-0 overflow-hidden ring-1 ring-brand-orange/20 shadow-xl shadow-brand-orange/5">
+            <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/20">
+                <div>
+                   <h2 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">Live Kitchen Monitor</h2>
+                   <p className="text-xs font-bold text-gray-500 uppercase">Real-time Order Tracking</p>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1 bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 rounded-lg">
+                   <div className="w-2 h-2 rounded-full bg-brand-orange animate-pulse"></div>
+                   <span className="text-[10px] font-black text-gray-500 uppercase">Syncing...</span>
+                </div>
+            </div>
+            
+            <div className="p-0">
+               <table className="w-full text-left border-collapse">
+                   <thead>
+                       <tr className="bg-gray-50/30 dark:bg-surface-dark-deep border-b border-gray-100 dark:border-gray-800">
+                           <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase">Order</th>
+                           <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase">Table</th>
+                           <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase">Status</th>
+                           <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase">Progress</th>
+                           <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase text-right">Estimate</th>
+                       </tr>
+                   </thead>
+                   <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                        {activeOrders.length === 0 ? (
+                            <tr>
+                                <td colSpan="5" className="px-6 py-10 text-center text-gray-400 text-sm italic">
+                                    No active orders in the kitchen right now.
+                                </td>
+                            </tr>
+                        ) : (
+                            activeOrders.slice(0, 5).map((order) => {
+                                const statusProgress = {
+                                    'PLACED': '15%',
+                                    'IN_KITCHEN': '65%',
+                                    'READY': '100%'
+                                };
+                                
+                                return (
+                                    <tr key={order.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <span className="font-black text-sm text-gray-900 dark:text-white">#{order.id.toString().padStart(4, '0')}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md text-xs font-bold">
+                                                Table {order.tableNumber || order.tableId}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${order.status === 'IN_KITCHEN' ? 'bg-brand-orange animate-pulse' : 'bg-blue-500'}`}></div>
+                                                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{order.status}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="w-24 bg-gray-100 dark:bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                                                <div className="bg-brand-orange h-full rounded-full transition-all duration-1000" 
+                                                     style={{ width: statusProgress[order.status] || '0%' }}></div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <span className="text-xs font-mono font-bold text-brand-orange">
+                                                {order.estimatedMinutes ? `${order.estimatedMinutes}m` : '--'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
+                    </tbody>
+               </table>
+            </div>
+            <div className="p-3 bg-gray-50/50 dark:bg-gray-800/20 border-t border-gray-100 dark:border-gray-800 text-center">
+                 <button className="text-[10px] font-black text-brand-orange uppercase hover:underline">View Full Kitchen Display System</button>
+            </div>
+        </Card>
 
         {/* Live Reservations Timeline */}
         <Card className="pt-5 pb-6 px-6">
