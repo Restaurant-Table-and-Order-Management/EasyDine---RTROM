@@ -16,6 +16,7 @@ import KitchenDashboard from './pages/dashboard/KitchenDashboard';
 import CustomerDashboard from './pages/dashboard/CustomerDashboard';
 
 import NotFoundPage from './pages/NotFoundPage';
+import LandingPage from './pages/LandingPage';
 import TableSearchPage from './features/tables/TableSearchPage';
 import TableManagementPage from './features/tables/TableManagementPage';
 import MyReservationsPage from './features/reservations/MyReservationsPage';
@@ -172,7 +173,7 @@ function App() {
           </Route>
 
           {/* Redirects & fallbacks */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
