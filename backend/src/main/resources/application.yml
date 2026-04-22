@@ -3,9 +3,9 @@ spring:
     name: easydine
 
   datasource:
-    url: your url
-    username: your username
-    password: your password
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -29,7 +29,7 @@ server:
     context-path: /api
 
 jwt:
-  secret: b7f9c2e8a1d34f6c9e0b2a7d5f8c3e6a1b9d4f7c2e8a6b3d5f1c9a7e2d4b6f8
+  secret: ${JWT_SECRET}
   expiration: 86400000 # 24 hours in milliseconds
   refresh-expiration: 604800000 # 7 days in milliseconds
 
