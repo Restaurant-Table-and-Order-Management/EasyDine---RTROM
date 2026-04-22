@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     setError('');
-    
+
     try {
       // Simulate/Call API
       await authApi.forgotPassword(email);
@@ -45,11 +45,11 @@ export default function ForgotPasswordPage() {
             <p className="text-gray-500 dark:text-gray-400 mb-8">
               We've sent a password reset link to <span className="font-semibold text-gray-900 dark:text-white">{email}</span>.
             </p>
-            
+
             <div className="mb-8 p-4 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-xl text-left">
               <p className="text-[10px] font-black text-orange-800 dark:text-orange-400 uppercase tracking-widest mb-2">Simulated Reset Link (Development Only)</p>
-              <Link 
-                to="/reset-password?token=dummy-token" 
+              <Link
+                to="/reset-password?token=dummy-token"
                 className="text-xs font-bold text-orange-600 hover:underline break-all"
               >
                 Click here to reset password (Simulation)
@@ -111,8 +111,8 @@ export default function ForgotPasswordPage() {
           </form>
 
           <div className="mt-8 text-center">
-            <Link 
-              to="/login" 
+            <Link
+              to="/login"
               className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-brand-orange transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />

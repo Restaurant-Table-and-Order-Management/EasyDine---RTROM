@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ChefHat, ArrowRight, ShieldCheck, Users, Utensils } from 'lucide-react';
+import { Mail, Lock, User, ChefHat, ArrowRight, ShieldCheck, Users, Utensils, Check, X } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -42,8 +42,16 @@ export default function SignupPage() {
     }
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else {
+      const pw = formData.password;
+      const failedRules = [];
+      if (pw.length < 6) failedRules.push('at least 6 characters');
+      if (!/[a-zA-Z]/.test(pw)) failedRules.push('a letter');
+      if (!/[0-9]/.test(pw)) failedRules.push('a number');
+      if (!/[!@#$%^&*()_+\-={}|;':",./<>?[\]\\`~]/.test(pw)) failedRules.push('a special character');
+      if (failedRules.length > 0) {
+        newErrors.password = `Still needs: ${failedRules.join(', ')}`;
+      }
     }
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
@@ -64,7 +72,7 @@ export default function SignupPage() {
       formData.password,
       formData.role
     );
-    
+
     if (result.success) {
       toast.success(`Welcome, ${result.user.name}! Account created.`);
       navigate(getRoleRedirect());
@@ -175,11 +183,10 @@ export default function SignupPage() {
                       key={role.id}
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, role: role.id }))}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all group ${
-                        isSelected 
-                          ? 'border-brand-orange bg-brand-orange/5 text-brand-orange shadow-sm' 
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all group ${isSelected
+                          ? 'border-brand-orange bg-brand-orange/5 text-brand-orange shadow-sm'
                           : 'border-gray-100 dark:border-gray-800 hover:border-brand-orange/30 text-gray-500 dark:text-gray-400'
-                      }`}
+                        }`}
                     >
                       <Icon className={`w-5 h-5 mb-1.5 transition-transform group-hover:scale-110 ${isSelected ? 'text-brand-orange' : ''}`} />
                       <span className="text-[10px] font-bold uppercase tracking-wider">{role.label}</span>
@@ -198,8 +205,32 @@ export default function SignupPage() {
               onChange={handleInputChange}
               error={formErrors.password}
               icon={Lock}
-              helperText="Minimum 6 characters"
             />
+
+            {/* Compact Password Strength — 2x2 grid, auto-hides when all pass */}
+            {formData.password.length > 0 && (() => {
+              const rules = [
+                { label: '6+ chars', passed: formData.password.length >= 6 },
+                { label: 'A letter', passed: /[a-zA-Z]/.test(formData.password) },
+                { label: 'A number', passed: /[0-9]/.test(formData.password) },
+                { label: 'Special (!@#..)', passed: /[!@#$%^&*()_+\-={}|;':\",./<>?\[\]\\`~]/.test(formData.password) },
+              ];
+              const allPassed = rules.every(r => r.passed);
+              return allPassed ? (
+                <p className="-mt-2 text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5" /> Strong password ✓
+                </p>
+              ) : (
+                <div className="-mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
+                  {rules.map((rule) => (
+                    <span key={rule.label} className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${rule.passed ? 'text-green-600 dark:text-green-400' : 'text-gray-400'}`}>
+                      {rule.passed ? <Check className="w-3 h-3 shrink-0" /> : <X className="w-3 h-3 shrink-0" />}
+                      {rule.label}
+                    </span>
+                  ))}
+                </div>
+              );
+            })()}
 
             <Input
               label="Confirm Password"
