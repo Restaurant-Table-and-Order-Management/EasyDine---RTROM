@@ -1,5 +1,12 @@
 package com.easydine.billing.controller;
 
+import com.easydine.billing.dto.BillResponse;
+import com.easydine.billing.service.BillService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.easydine.billing.dto.*;
@@ -9,51 +16,45 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/billing")
+@RequiredArgsConstructor
 public class BillingController {
-    // Skeleton only - implementation pending
-    private final BillingService billingService;
-    // POST /billing/bills/generate/{tableId}
-    @PostMapping("/bills/generate/{tableId}")
-    public ResponseEntity<BillResponseDTO> generateBill(
-            @PathVariable Long tableId,
-            @RequestParam Long reservationId,
-            @RequestBody List<BillItemDTO> items) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(billingService.generateBill(tableId, reservationId, items));
+
+    private final BillService billService;
+
+    @GetMapping("/reservation/{id}")
+    public ResponseEntity<BillResponse> getBill(@PathVariable Long id) {
+        return ResponseEntity.ok(billService.generateBill(id));
     }
 
-    // GET /billing/bills/{billId}
-    @GetMapping("/bills/{billId}")
-    public ResponseEntity<BillResponseDTO> getBill(@PathVariable Long billId) {
-        return ResponseEntity.ok(billingService.getBillById(billId));
-    }
-
-    // POST /billing/payments/initiate
-    @PostMapping("/payments/initiate")
-    public ResponseEntity<Map<String, Object>> initiatePayment(
-            @RequestBody @Valid PaymentInitiateDTO dto) {
-        return ResponseEntity.ok(billingService.initiatePayment(dto));
-    }
-
-    // POST /billing/payments/webhook
-    @PostMapping("/payments/webhook")
-    public ResponseEntity<Void> paymentWebhook(@RequestBody Map<String, Object> payload) {
-        billingService.handlePaymentWebhook(payload);
+    @PostMapping("/confirm/{reservationId}")
+    public ResponseEntity<Void> confirmPayment(@PathVariable Long reservationId) {
+        billService.confirmPayment(reservationId);
         return ResponseEntity.ok().build();
     }
 
-    // PUT /billing/payments/cash/{billId}
-    @PutMapping("/payments/cash/{billId}")
-    public ResponseEntity<BillResponseDTO> markCashPayment(@PathVariable Long billId) {
-        return ResponseEntity.ok(billingService.markPaidByCash(billId));
+    @GetMapping("/report/revenue")
+    public ResponseEntity<com.easydine.billing.dto.RevenueReportResponse> getRevenueReport() {
+        return ResponseEntity.ok(billService.getRevenueReport());
     }
 
-    // GET /billing/bills/{billId}/receipt
-    @GetMapping("/bills/{billId}/receipt")
-    public ResponseEntity<String> downloadReceipt(@PathVariable Long billId) {
-        return ResponseEntity.ok("Receipt for bill " + billId);
+    @PostMapping("/email-receipt")
+    public ResponseEntity<Void> sendEmail(@org.springframework.web.bind.annotation.RequestParam Long reservationId, @org.springframework.web.bind.annotation.RequestParam String email) {
+        billService.simulateEmailReceipt(reservationId, email);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/admin/ledger")
+    public ResponseEntity<List<com.easydine.billing.dto.BillResponse>> getLedger(@org.springframework.web.bind.annotation.RequestParam String date) {
+        return ResponseEntity.ok(billService.getAllBillsByDate(date));
+    }
+
+    @PostMapping("/admin/refund/{id}")
+    public ResponseEntity<Void> refund(@PathVariable Long id) {
+        billService.processRefund(id);
+        return ResponseEntity.ok().build();
     }
 }

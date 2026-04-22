@@ -37,7 +37,7 @@ public class RestaurantTable {
     private Integer capacity;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100, columnDefinition = "varchar(100)")
     private TableStatus status;
 
     private String location;

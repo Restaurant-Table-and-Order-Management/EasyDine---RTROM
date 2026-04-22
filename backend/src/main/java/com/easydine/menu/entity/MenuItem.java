@@ -28,10 +28,11 @@ public class MenuItem {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @Column(length = 500)
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100, columnDefinition = "varchar(100)")
     private MenuCategory category;
 
     @Column(nullable = false)

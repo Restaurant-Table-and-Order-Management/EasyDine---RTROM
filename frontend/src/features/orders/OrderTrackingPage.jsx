@@ -29,14 +29,24 @@ export default function OrderTrackingPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reservation, setReservation] = useState(null);
+  const [bill, setBill] = useState(null);
 
   const fetchSessionData = async () => {
     try {
       const reservationRes = await api.get(`/reservations/${reservationId}`);
+      // Handle the ApiResponse wrapper: reservationRes is the envelope, reservationRes.data is the DTO
       setReservation(reservationRes.data || reservationRes);
       
       const ordersRes = await api.get(`/orders/reservation/${reservationId}`);
-      setOrders(ordersRes.data || (Array.isArray(ordersRes) ? ordersRes : []));
+      setOrders(Array.isArray(ordersRes) ? ordersRes : (ordersRes.data || []));
+      
+      try {
+        const billRes = await api.get(`/billing/reservation/${reservationId}`);
+        setBill(billRes.data || billRes);
+      } catch (err) {
+        // Bill might not be available if no orders placed yet
+        setBill(null);
+      }
       
       // Ensure the cart knows this is our active session
       setActiveReservationId(reservationId);
@@ -56,8 +66,9 @@ export default function OrderTrackingPage() {
 
   const getStatusStep = (status) => {
     const steps = {
-      'PENDING': 1,
-      'PREPARING': 2,
+      'PENDING': 0,
+      'PLACED': 1,
+      'IN_KITCHEN': 2,
       'READY': 3,
       'SERVED': 4,
       'CANCELLED': 0
@@ -85,8 +96,8 @@ export default function OrderTrackingPage() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <button 
-          onClick={() => navigate('/dashboard')}
-          className="p-2 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+          onClick={() => navigate('/my-orders')}
+          className="p-2 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-brand-orange transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -132,14 +143,30 @@ export default function OrderTrackingPage() {
                 </div>
 
                 <div className="p-6">
+                  {/* Estimation Alert */}
+                  {order.status === 'IN_KITCHEN' && order.estimatedMinutes && (
+                    <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20 rounded-xl flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white dark:bg-surface-dark rounded-lg shadow-sm">
+                                <Clock className="w-4 h-4 text-brand-orange animate-pulse" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-orange-600 dark:text-brand-orange uppercase">Estimated Ready</p>
+                                <p className="text-sm font-black text-gray-900 dark:text-white">In ~{order.estimatedMinutes} minutes</p>
+                            </div>
+                        </div>
+                        <span className="text-[10px] font-bold py-1 px-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-md">LIVE</span>
+                    </div>
+                  )}
+
                   {/* Status Progress Bar */}
                   {order.status !== 'CANCELLED' && (
                     <div className="mb-8 relative">
                       <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-100 dark:bg-gray-800 -z-10" />
                       <div className="flex justify-between items-center">
                         {[
-                          { label: 'Pending', icon: Timer },
-                          { label: 'Preparing', icon: ChefHat },
+                          { label: 'Placed', icon: Timer },
+                          { label: 'In Kitchen', icon: ChefHat },
                           { label: 'Ready', icon: ShoppingBag },
                           { label: 'Served', icon: CheckCircle2 }
                         ].map((step, i) => {
@@ -164,6 +191,17 @@ export default function OrderTrackingPage() {
                       </div>
                     </div>
                   )}
+                  {order.status === 'CANCELLED' && (
+                    <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold text-red-700 dark:text-red-400 uppercase tracking-tighter">Information</p>
+                            <p className="text-sm text-red-600 dark:text-red-300">
+                                This order was cancelled: <span className="font-bold italic">"{order.cancellationReason || 'No reason provided'}"</span>
+                            </p>
+                        </div>
+                    </div>
+                  )}
 
                   {/* Items List */}
                   <div className="space-y-3">
@@ -178,12 +216,12 @@ export default function OrderTrackingPage() {
                             )}
                           </div>
                         </div>
-                        <span className="font-medium text-gray-500">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-medium text-gray-500">₹{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     ))}
                     <div className="pt-3 mt-3 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Order Total</span>
-                      <span className="text-lg font-black text-gray-900 dark:text-white">${order.totalAmount.toFixed(2)}</span>
+                      <span className="text-lg font-black text-gray-900 dark:text-white">₹{order.totalAmount.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -202,17 +240,25 @@ export default function OrderTrackingPage() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold opacity-80 uppercase tracking-widest">Running Total</h4>
-                  <p className="text-3xl font-black">${totalSessionAmount.toFixed(2)}</p>
+                  <p className="text-3xl font-black">₹{(bill?.grandTotal || 0).toFixed(2)}</p>
                 </div>
               </div>
               <div className="space-y-4 pt-4 border-t border-white/20">
                 <div className="flex justify-between items-center text-sm">
-                    <span className="opacity-80">Total Orders</span>
-                    <span className="font-bold">{orders.length}</span>
+                    <span className="opacity-80">Subtotal</span>
+                    <span className="font-bold">₹{(bill?.subtotal || 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                    <span className="opacity-80">GST (5%)</span>
+                    <span className="font-bold">₹{(bill?.taxAmount || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                     <span className="opacity-80">Payment Status</span>
-                    <span className="bg-white/20 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase">Unpaid</span>
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase ${
+                      reservation.status === 'COMPLETED' ? 'bg-green-500 text-white' : 'bg-white/20 text-white'
+                    }`}>
+                      {reservation.status === 'COMPLETED' ? 'PAID' : 'UNPAID'}
+                    </span>
                 </div>
               </div>
             </div>
@@ -228,8 +274,8 @@ export default function OrderTrackingPage() {
                 <span className="text-sm font-bold text-gray-900 dark:text-white">#{reservation.tableNumber}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Floor</span>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">Garden Area</span>
+                <span className="text-sm text-gray-500">Location</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white">{reservation.tableLocation || 'Indoor'}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Party Size</span>

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    private final java.util.Map<String, String> resetTokens = new java.util.concurrent.ConcurrentHashMap<>();
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -64,5 +65,34 @@ public class AuthService {
                 .name(user.getName())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    public void forgotPassword(String email) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        
+        // Generate a simple token
+        String token = java.util.UUID.randomUUID().toString();
+        resetTokens.put(token, email);
+        resetTokens.put("dummy-token", email); // For easy UI testing
+        
+        System.out.println("DEBUG: Password reset requested for: " + email);
+        System.out.println("DEBUG: RESET LINK: http://localhost:5173/reset-password?token=" + token);
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        String email = resetTokens.get(token);
+        if (email == null) {
+            throw new RuntimeException("Invalid or expired reset token");
+        }
+        
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        resetTokens.remove(token);
+        System.out.println("DEBUG: Password reset successfully for: " + email);
     }
 }

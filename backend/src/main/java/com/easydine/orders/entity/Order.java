@@ -40,20 +40,41 @@ public class Order {
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100, columnDefinition = "varchar(100)")
     private OrderStatus status;
+
+    @Column(length = 100, unique = true)
+    private String orderNumber;
+
+    @Column
+    private LocalDateTime orderDate;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(length = 1000)
+    private String cancellationReason;
+
+    private Integer estimatedMinutes;
+
+    @Column(length = 50)
+    private String paymentMethod;
+
+    @Column(length = 50)
+    private String paymentStatus;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        if (orderDate == null) {
+            orderDate = now;
+        }
         if (status == null) {
-            status = OrderStatus.PENDING;
+            status = OrderStatus.PLACED;
         }
     }
 }

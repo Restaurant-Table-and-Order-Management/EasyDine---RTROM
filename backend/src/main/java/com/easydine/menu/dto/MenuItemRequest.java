@@ -25,11 +25,15 @@ public class MenuItemRequest {
     @NotNull(message = "Category is required")
     private MenuCategory category;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("available")
     private boolean isAvailable;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("special")
     private boolean isSpecial;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("vegetarian")
     private boolean isVegetarian;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("popular")
     private boolean isPopular;
 }

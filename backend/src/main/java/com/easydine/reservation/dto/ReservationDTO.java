@@ -21,6 +21,7 @@ public class ReservationDTO {
     private String userName;
     private Long tableId;
     private String tableNumber;
+    private String tableLocation;
     private LocalDate reservationDate;
     private LocalTime startTime;
     private LocalTime endTime;

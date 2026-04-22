@@ -8,14 +8,19 @@ import DashboardLayout from './components/layout/DashboardLayout';
 // Auth pages
 import LoginPage from './features/auth/LoginPage';
 import SignupPage from './features/auth/SignupPage';
+import ForgotPasswordPage from './features/auth/ForgotPasswordPage';
+import ResetPasswordPage from './features/auth/ResetPasswordPage';
 
 // Feature pages
 // import DashboardPage from './pages/DashboardPage'; // Let's create specific dashboard pages for each role or a smart one.
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import KitchenDashboard from './pages/dashboard/KitchenDashboard';
+import WaiterDashboard from './pages/dashboard/WaiterDashboard';
+import AdminBillingPage from './pages/dashboard/AdminBillingPage';
 import CustomerDashboard from './pages/dashboard/CustomerDashboard';
 
 import NotFoundPage from './pages/NotFoundPage';
+import LandingPage from './pages/LandingPage';
 import TableSearchPage from './features/tables/TableSearchPage';
 import TableManagementPage from './features/tables/TableManagementPage';
 import MyReservationsPage from './features/reservations/MyReservationsPage';
@@ -23,6 +28,7 @@ import AdminReservationsPage from './features/reservations/AdminReservationsPage
 import MenuManagementPage from './features/menu/MenuManagementPage';
 import CustomerMenuPage from './features/orders/CustomerMenuPage';
 import OrderTrackingPage from './features/orders/OrderTrackingPage';
+import MyOrdersPage from './features/orders/MyOrdersPage';
 
 // Guards
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -75,6 +81,22 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/forgot-password"
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <ForgotPasswordPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <ResetPasswordPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected dashboard layout routes */}
           <Route
@@ -110,6 +132,14 @@ function App() {
               }
             />
             <Route
+              path="/admin/billing"
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="ADMIN">
+                  <AdminBillingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/menu"
               element={
                 <ProtectedRoute requireAuth={true} requiredRole="ADMIN">
@@ -118,12 +148,28 @@ function App() {
               }
             />
 
-            {/* STAFF ROUTES */}
             <Route
               path="/staff/dashboard"
               element={
                 <ProtectedRoute requireAuth={true} requiredRole={['STAFF', 'KITCHEN_STAFF']}>
                   <KitchenDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/kitchen/orders"
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="KITCHEN_STAFF">
+                  <KitchenDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/waiter/dashboard"
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="WAITER">
+                  <WaiterDashboard />
                 </ProtectedRoute>
               }
             />
@@ -169,10 +215,18 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/my-orders"
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="CUSTOMER">
+                  <MyOrdersPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Redirects & fallbacks */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
