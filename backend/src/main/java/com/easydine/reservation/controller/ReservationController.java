@@ -57,6 +57,13 @@ public class ReservationController {
                 reservationService.confirmReservation(id)));
     }
 
+    @PutMapping("/{id}/check-in")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
+    public ResponseEntity<ApiResponse<ReservationDTO>> checkInGuest(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Guest checked in and table occupied", 
+                reservationService.checkInGuest(id)));
+    }
+
     @PutMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<ReservationDTO>> cancelReservation(@PathVariable Long id) {
         // Both ADMIN and OWNER (handled in service if needed) can cancel

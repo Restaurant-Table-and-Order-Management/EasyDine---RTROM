@@ -14,13 +14,13 @@ import useAuthStore from '../../store/authStore';
 import useDataStore from '../../store/dataStore';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StatusBadge from '../../components/common/StatusBadge';
 import { formatDate, formatTime, getTodayDate } from '../../utils/dateHelpers';
 
 export default function CustomerDashboard() {
   const { user } = useAuthStore();
-  const { reservations, fetchMyReservations } = useDataStore();
+  const { reservations, fetchMyReservations, myOrders, myOrdersLoading, fetchMyOrders } = useDataStore();
   const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useState({
@@ -31,7 +31,8 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     fetchMyReservations();
-  }, [fetchMyReservations]);
+    fetchMyOrders();
+  }, [fetchMyReservations, fetchMyOrders]);
 
   const upcomingReservations = reservations.filter(
     (r) =>
@@ -177,6 +178,58 @@ export default function CustomerDashboard() {
                                  </div>
                                  <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-brand-orange transition-colors" />
                              </div>
+                        </Card>
+                    ))}
+                </div>
+            )}
+        </div>
+        
+        {/* Recent Orders Section */}
+        <div>
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    My Recent Orders
+                </h3>
+            </div>
+
+            {myOrdersLoading && myOrders.length === 0 ? (
+                <div className="py-8 flex justify-center"><LoadingSpinner size="md" /></div>
+            ) : myOrders.length === 0 ? (
+                <Card className="p-8 text-center bg-gray-50/30 dark:bg-gray-800/10 border-dashed">
+                    <Coffee className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm text-gray-500">You haven't placed any orders yet.</p>
+                </Card>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {myOrders.slice(0, 4).map(order => (
+                        <Card key={order.id} className="p-4 border border-gray-100 dark:border-gray-800 flex items-center justify-between group hover:border-brand-orange/30 transition-all">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-brand-orange/10 rounded-xl text-brand-orange group-hover:bg-brand-orange group-hover:text-white transition-all">
+                                    <Coffee className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-bold text-gray-900 dark:text-white">Order #{order.id}</p>
+                                        <StatusBadge status={order.status} />
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-1">
+                                        <p className="text-xs font-black text-brand-orange">₹{(order.totalAmount || 0).toFixed(2)}</p>
+                                        {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && order.estimatedMinutes && (
+                                            <span className="flex items-center gap-1 text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-gray-500 font-bold">
+                                                <Clock className="w-3 h-3" /> {order.estimatedMinutes}m Prep
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => navigate(`/order-track/${order.reservationId}`)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                Track
+                            </Button>
                         </Card>
                     ))}
                 </div>

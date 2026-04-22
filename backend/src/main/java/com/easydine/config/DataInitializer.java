@@ -9,6 +9,10 @@ import com.easydine.menu.repository.MenuItemRepository;
 import com.easydine.table.entity.RestaurantTable;
 import com.easydine.table.model.TableStatus;
 import com.easydine.table.repository.RestaurantTableRepository;
+import com.easydine.orders.repository.OrderRepository;
+import com.easydine.orders.entity.Order;
+import com.easydine.orders.entity.OrderItem;
+import com.easydine.orders.entity.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -27,6 +31,7 @@ public class DataInitializer implements CommandLineRunner {
     private final MenuItemRepository menuItemRepository;
     private final RestaurantTableRepository tableRepository;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -34,6 +39,7 @@ public class DataInitializer implements CommandLineRunner {
         seedUsers();
         seedTables();
         seedMenuItems();
+        seedOrders();
     }
 
     // ─────────────────────────────────────────────
@@ -57,6 +63,18 @@ public class DataInitializer implements CommandLineRunner {
                 .email("customer@gmail.com")
                 .password(passwordEncoder.encode("123456"))
                 .role(Role.CUSTOMER)
+                .build(),
+            User.builder()
+                .name("Chef Gordon")
+                .email("chef@gmail.com")
+                .password(passwordEncoder.encode("123456"))
+                .role(Role.KITCHEN_STAFF)
+                .build(),
+            User.builder()
+                .name("Waiter Sam")
+                .email("waiter@gmail.com")
+                .password(passwordEncoder.encode("123456"))
+                .role(Role.WAITER)
                 .build()
         );
 
@@ -258,5 +276,67 @@ public class DataInitializer implements CommandLineRunner {
                 .isVegetarian(vegetarian)
                 .isPopular(popular)
                 .build();
+    }
+
+    private void seedOrders() {
+        if (orderRepository.count() > 0) {
+            log.info("Orders already seeded – skipping.");
+            return;
+        }
+
+        User customer = userRepository.findByEmail("customer@gmail.com").orElse(null);
+        if (customer == null) return;
+
+        List<RestaurantTable> tables = tableRepository.findAll();
+        List<MenuItem> menuItems = menuItemRepository.findAll();
+
+        if (tables.isEmpty() || menuItems.isEmpty()) return;
+
+        // Create 2 active orders for the KDS
+        Order order1 = Order.builder()
+                .user(customer)
+                .table(tables.get(0))
+                .status(OrderStatus.PLACED)
+                .orderNumber("ORD-SEED-101")
+                .orderDate(java.time.LocalDateTime.now())
+                .totalAmount(BigDecimal.valueOf(25.98))
+                .build();
+        
+        OrderItem item1 = OrderItem.builder()
+                .order(order1)
+                .menuItem(menuItems.get(0))
+                .quantity(2)
+                .priceAtTimeOfOrder(menuItems.get(0).getPrice())
+                .specialInstructions("Extra Spicy please!")
+                .build();
+        
+        order1.setOrderItems(List.of(item1));
+
+        Order order2 = Order.builder()
+                .user(customer)
+                .table(tables.get(2))
+                .status(OrderStatus.IN_KITCHEN)
+                .orderNumber("ORD-SEED-102")
+                .orderDate(java.time.LocalDateTime.now())
+                .totalAmount(BigDecimal.valueOf(18.50))
+                .build();
+
+        OrderItem item2 = OrderItem.builder()
+                .order(order2)
+                .menuItem(menuItems.get(5))
+                .quantity(1)
+                .priceAtTimeOfOrder(menuItems.get(5).getPrice())
+                .build();
+        
+        order2.setOrderItems(List.of(item2));
+
+        orderRepository.saveAll(List.of(order1, order2));
+        
+        // Mark these tables as OCCUPIED in the demo data
+        tables.get(0).setStatus(TableStatus.OCCUPIED);
+        tables.get(2).setStatus(TableStatus.OCCUPIED);
+        tableRepository.saveAll(List.of(tables.get(0), tables.get(2)));
+        
+        log.info("✅ Seeded 2 sample orders for the KDS.");
     }
 }

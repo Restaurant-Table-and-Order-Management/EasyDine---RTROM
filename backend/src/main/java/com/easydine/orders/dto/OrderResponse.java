@@ -21,6 +21,12 @@ public class OrderResponse {
     private String tableNumber;
     private BigDecimal totalAmount;
     private OrderStatus status;
+    private String orderNumber;
+    private java.time.LocalDateTime orderDate;
     private LocalDateTime createdAt;
+    private String cancellationReason;
+    private Integer estimatedMinutes;
+    private String paymentMethod;
+    private String paymentStatus;
     private List<OrderItemResponse> items;
 }

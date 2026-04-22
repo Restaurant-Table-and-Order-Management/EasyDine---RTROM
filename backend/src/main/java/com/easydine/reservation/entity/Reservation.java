@@ -56,10 +56,12 @@ public class Reservation {
     private Integer guestCount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100, columnDefinition = "varchar(100)")
     private ReservationStatus status;
 
     private String specialRequests;
+
+    private java.math.BigDecimal totalPaid;
 
     @CreationTimestamp
     @Column(updatable = false)

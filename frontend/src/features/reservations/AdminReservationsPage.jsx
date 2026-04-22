@@ -16,6 +16,7 @@ export default function AdminReservationsPage() {
     fetchAllReservations,
     confirmReservation,
     cancelReservation,
+    checkInGuest,
   } = useDataStore();
 
   const [dateFilter, setDateFilter] = useState(''); // Default to all dates initially
@@ -65,6 +66,16 @@ export default function AdminReservationsPage() {
       const result = await cancelReservation(id);
       if (result.success) {
         toast.success('Reservation cancelled', { id: loadingId });
+      } else {
+        toast.error(result.message, { id: loadingId });
+      }
+  };
+  
+  const handleCheckIn = async (id) => {
+      const loadingId = toast.loading('Checking in guest...');
+      const result = await checkInGuest(id);
+      if (result.success) {
+        toast.success('Guest seated and table occupied', { id: loadingId });
       } else {
         toast.error(result.message, { id: loadingId });
       }
@@ -212,6 +223,7 @@ export default function AdminReservationsPage() {
                 reservation={reservation}
                 onConfirm={handleConfirm}
                 onCancel={handleCancel}
+                onCheckIn={handleCheckIn}
                 showCustomerName
                 isAdminView
               />

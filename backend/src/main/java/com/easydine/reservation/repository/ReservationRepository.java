@@ -16,6 +16,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     
     List<Reservation> findByReservationDateAndStatus(LocalDate date, ReservationStatus status);
     
+    List<Reservation> findByReservationDateOrderByCreatedAtDesc(LocalDate date);
+
     @Query("SELECT r FROM Reservation r WHERE r.table.id = :tableId AND r.reservationDate = :date " +
            "AND r.status = 'CONFIRMED' " +
            "AND (r.startTime < :endTime AND r.endTime > :startTime)")
