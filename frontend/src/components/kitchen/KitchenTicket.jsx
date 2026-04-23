@@ -40,14 +40,10 @@ export default function KitchenTicket({ order, onUpdateStatus }) {
 
   const handleStatusClick = async (manualEstimate = null) => {
     setIsUpdating(true);
-    const statusFlow = {
-        'PLACED': 'PREPARING',
-        'PREPARING': 'COOKING',
-        'COOKING': 'PLATING',
-        'PLATING': 'READY',
-        'READY': 'SERVED'
-    };
-    const nextStatus = statusFlow[order.status] || 'READY';
+    let nextStatus;
+    if (order.status === 'PLACED') nextStatus = 'IN_KITCHEN';
+    else if (order.status === 'IN_KITCHEN') nextStatus = 'READY';
+    else nextStatus = 'SERVED';
     
     if (order.status === 'PLACED' && !showEstimates && manualEstimate === null) {
       setShowEstimates(true);
@@ -167,8 +163,8 @@ export default function KitchenTicket({ order, onUpdateStatus }) {
             </Button>
 
             <Button
-              variant={order.status === 'PLACED' ? 'primary' : 'success'}
-              className="flex-1 shadow-md"
+              variant={order.status === 'PLACED' ? 'primary' : order.status === 'IN_KITCHEN' ? 'success' : 'outline'}
+              className={`flex-1 shadow-md ${order.status === 'READY' ? 'border-green-500 text-green-600 hover:bg-green-50' : ''}`}
               onClick={() => handleStatusClick()}
               loading={isUpdating}
             >
@@ -192,10 +188,15 @@ export default function KitchenTicket({ order, onUpdateStatus }) {
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Mark Ready
                 </>
-              ) : (
+              ) : order.status === 'IN_KITCHEN' ? (
                 <>
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Mark Served
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                  Serve Now
                 </>
               )}
             </Button>

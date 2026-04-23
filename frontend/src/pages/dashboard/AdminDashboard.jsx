@@ -13,6 +13,7 @@ import {
   DollarSign,
   Wallet,
   Receipt,
+  CheckCircle2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -252,16 +253,27 @@ export default function AdminDashboard() {
         </div>
 
         {/* Financial Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-3xl shadow-xl shadow-green-500/20 text-white relative overflow-hidden group">
                  <div className="relative z-10">
-                    <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Revenue Today</p>
-                    <h3 className="text-3xl font-black">₹{revenueData?.totalRevenue?.toFixed(2) || '0.00'}</h3>
+                    <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Settled (Paid)</p>
+                    <h3 className="text-3xl font-black">₹{revenueData?.settledRevenue?.toFixed(2) || '0.00'}</h3>
                     <div className="flex items-center gap-2 mt-4 text-[10px] font-bold bg-white/10 w-fit px-2 py-1 rounded-full">
-                        <TrendingUp className="w-3 h-3" /> 12% increase from yesterday
+                        <CheckCircle2 className="w-3 h-3" /> Collected funds
                     </div>
                  </div>
                  <DollarSign className="absolute -right-4 -bottom-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500" />
+            </div>
+
+            <div className="bg-white dark:bg-surface-dark p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Pending (At Tables)</p>
+                    <h3 className="text-3xl font-black text-gray-900 dark:text-white">₹{revenueData?.pendingRevenue?.toFixed(2) || '0.00'}</h3>
+                </div>
+                <div className="flex items-center gap-2 mt-4 text-[10px] font-bold text-brand-orange uppercase tracking-wider">
+                    <Clock className="w-4 h-4" />
+                    <span>Unpaid running total</span>
+                </div>
             </div>
 
             <div className="bg-white dark:bg-surface-dark p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between">

@@ -108,8 +108,8 @@ export default function OrderTrackingPage() {
 
   useEffect(() => {
     fetchSessionData();
-    // Poll for status updates every 15 seconds
-    const interval = setInterval(fetchSessionData, 15000);
+    // Poll for status updates every 8 seconds for a livelier feel
+    const interval = setInterval(fetchSessionData, 8000);
     return () => clearInterval(interval);
   }, [reservationId]);
 
@@ -312,6 +312,16 @@ export default function OrderTrackingPage() {
                       {reservation.status === 'COMPLETED' ? 'PAID' : 'UNPAID'}
                     </span>
                 </div>
+                
+                {reservation.status !== 'COMPLETED' && bill?.grandTotal > 0 && (
+                   <Button 
+                     fullWidth 
+                     onClick={() => navigate('/payments')}
+                     className="mt-4 bg-white text-brand-orange hover:bg-gray-50 border-none font-black uppercase tracking-tighter"
+                   >
+                      Proceed to Payment
+                   </Button>
+                )}
               </div>
               
               {reservation.status !== 'COMPLETED' && (

@@ -109,7 +109,8 @@ export const NAV_ITEMS = {
     { label: 'Browse Menu', path: '/menu', icon: 'Utensils' },
     { label: 'Find Tables', path: '/tables', icon: 'Search' },
     { label: 'My Reservations', path: '/my-reservations', icon: 'CalendarCheck' },
-    { label: 'My Orders', path: '/my-orders', icon: 'ShoppingBag' },
+    { label: 'My Order', path: '/my-orders', icon: 'ShoppingBag' },
+    { label: 'Payments', path: '/payments', icon: 'Wallet' },
   ],
 };
 
