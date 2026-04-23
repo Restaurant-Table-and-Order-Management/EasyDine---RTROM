@@ -5,7 +5,7 @@ import {
   Menu, X, ChefHat, Zap, Clock, Star,
   BarChart3, ShieldCheck, Smartphone, Layers, Wifi, Users,
   Sun, Moon, ArrowUp, Mail, Phone, MapPin,
-  Github, Twitter, Linkedin,
+  Github, Twitter, Linkedin, Wallet, MessageSquare, Send, User, CheckCircle
 } from 'lucide-react';
 
 // ─── Theme Context (page-scoped — does NOT touch Login/Register) ──────────────
@@ -56,14 +56,14 @@ function Navbar() {
     >
       <nav className="flex items-center justify-between px-6 py-3.5">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5">
+        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5">
           <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-orange to-brand-gold flex items-center justify-center shadow-md shadow-brand-orange/30">
             <ChefHat className="w-4 h-4 text-white" />
           </span>
           <span className={`text-lg font-bold tracking-tight ${dark ? 'text-white' : 'text-gray-900'}`}>
             Easy<span className="text-brand-orange">Dine</span>
           </span>
-        </Link>
+        </button>
 
         {/* Desktop Links */}
         <ul className="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -90,6 +90,7 @@ function Navbar() {
           >
             {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
+
           <Link
             to="/login"
             className={`text-sm font-semibold px-4 py-2 rounded-xl transition-colors ${dark ? 'text-gray-200 hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100'
@@ -130,6 +131,7 @@ function Navbar() {
               {label}
             </button>
           ))}
+
           <div className="flex gap-3 mt-2">
             <Link to="/login" className={`flex-1 text-center text-sm font-semibold border py-2 rounded-xl transition ${dark ? 'border-white/20 text-gray-200 hover:bg-white/10' : 'border-gray-200 hover:bg-gray-50'
               }`}>
@@ -141,7 +143,126 @@ function Navbar() {
           </div>
         </div>
       )}
+
+
     </header>
+  );
+}
+
+// ─── Feedback Modal ───────────────────────────────────────────────────────────
+function FeedbackModal({ isOpen, onClose }) {
+  const { dark } = useContext(ThemeCtx);
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSending(true);
+    // mailto fallback — opens the user's mail client
+    const subject = encodeURIComponent(`EasyDine Feedback from ${form.name}`);
+    const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`);
+    window.open(`mailto:example@email.com?subject=${subject}&body=${body}`, '_self');
+    setTimeout(() => {
+      setSending(false);
+      setSent(true);
+      setTimeout(() => { setSent(false); setForm({ name: '', email: '', message: '' }); onClose(); }, 2200);
+    }, 600);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4" onClick={onClose}>
+      {/* Backdrop */}
+      <motion.div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      />
+
+      {/* Modal */}
+      <motion.div
+        className={`relative w-full max-w-lg rounded-3xl shadow-2xl border p-8 ${
+          dark
+            ? 'bg-gray-900/95 border-white/10 shadow-black/40'
+            : 'bg-white border-gray-100 shadow-black/10'
+        }`}
+        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close */}
+        <button onClick={onClose} className={`absolute top-4 right-4 p-1.5 rounded-xl transition-colors ${dark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}>
+          <X className="w-5 h-5" />
+        </button>
+
+        {sent ? (
+          <motion.div
+            className="flex flex-col items-center justify-center py-10"
+            initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+          >
+            <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-5">
+              <CheckCircle className="w-8 h-8 text-green-500" />
+            </div>
+            <h3 className={`text-xl font-bold mb-2 ${dark ? 'text-white' : 'text-gray-900'}`}>Thank You!</h3>
+            <p className={`text-sm ${dark ? 'text-gray-400' : 'text-gray-500'}`}>Your feedback has been sent successfully.</p>
+          </motion.div>
+        ) : (
+          <>
+            <div className="mb-6">
+              <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-brand-orange bg-brand-orange/10 border border-brand-orange/20 px-3 py-1 rounded-full mb-3">
+                <MessageSquare className="w-3 h-3" /> Feedback
+              </span>
+              <h3 className={`text-2xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-gray-900'}`}>
+                We'd love to hear from you
+              </h3>
+              <p className={`text-sm mt-1 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Help us improve EasyDine with your valuable feedback.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>Name</label>
+                <div className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 transition-colors focus-within:border-brand-orange ${dark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+                  <User className={`w-4 h-4 flex-shrink-0 ${dark ? 'text-gray-500' : 'text-gray-400'}`} />
+                  <input name="name" value={form.name} onChange={handleChange} required placeholder="Your name"
+                    className={`w-full bg-transparent outline-none text-sm font-medium ${dark ? 'text-white placeholder:text-gray-600' : 'text-gray-900 placeholder:text-gray-400'}`}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>Email</label>
+                <div className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 transition-colors focus-within:border-brand-orange ${dark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+                  <Mail className={`w-4 h-4 flex-shrink-0 ${dark ? 'text-gray-500' : 'text-gray-400'}`} />
+                  <input name="email" type="email" value={form.email} onChange={handleChange} required placeholder="you@example.com"
+                    className={`w-full bg-transparent outline-none text-sm font-medium ${dark ? 'text-white placeholder:text-gray-600' : 'text-gray-900 placeholder:text-gray-400'}`}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${dark ? 'text-gray-400' : 'text-gray-500'}`}>Message</label>
+                <div className={`rounded-xl border px-4 py-3 transition-colors focus-within:border-brand-orange ${dark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+                  <textarea name="message" value={form.message} onChange={handleChange} required rows={4} placeholder="Share your thoughts, suggestions, or report an issue..."
+                    className={`w-full bg-transparent outline-none text-sm font-medium resize-none ${dark ? 'text-white placeholder:text-gray-600' : 'text-gray-900 placeholder:text-gray-400'}`}
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={sending}
+                className="w-full flex items-center justify-center gap-2 text-sm font-bold text-white py-3 rounded-xl bg-gradient-to-r from-brand-orange to-brand-gold shadow-md shadow-brand-orange/30 hover:shadow-lg hover:shadow-brand-orange/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-60"
+              >
+                {sending ? 'Sending...' : <><Send className="w-4 h-4" /> Send Feedback</>}
+              </button>
+            </form>
+          </>
+        )}
+      </motion.div>
+    </div>
   );
 }
 
@@ -312,7 +433,7 @@ function HeroSection() {
         </BentoCard>
 
         {/* Card 4 – Chef image */}
-        <BentoCard className="col-span-12 md:col-span-4 row-span-1">
+        <BentoCard className="col-span-12 md:col-span-7 row-span-1">
           <div className="relative w-full h-full min-h-[180px]">
             <img
               src="https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?w=600&q=80&auto=format&fit=crop"
@@ -329,12 +450,6 @@ function HeroSection() {
               </div>
             </div>
           </div>
-        </BentoCard>
-
-        {/* Card 5 – Stats */}
-        <BentoCard className={`col-span-12 md:col-span-3 row-span-1 p-5 flex flex-col justify-center ${dark ? 'bg-gradient-to-br from-brand-orange/20 to-brand-gold/10' : 'bg-gradient-to-br from-brand-orange/10 to-brand-gold/5'}`}>
-          <p className={`text-4xl font-extrabold mb-1 ${dark ? 'text-white' : 'text-gray-900'}`}>98<span className="text-brand-orange">%</span></p>
-          <p className={`text-sm font-medium ${dark ? 'text-gray-400' : 'text-gray-500'}`}>Customer satisfaction across all partner restaurants</p>
         </BentoCard>
       </motion.div>
     </section>
@@ -453,53 +568,73 @@ function SystemStatsMiniUI() {
     </div>
   );
 }
-// ─── Features Section (Phase 2) ──────────────────────────────────────────────
-const FEATURES = [
-  {
-    id: 'tracking',
-    badge: 'Real-Time',
-    icon: <Wifi className="w-5 h-5" />,
-    title: 'Live Order Tracking',
-    desc: 'Every order, every table, every status update — pushed instantly to kitchen displays and staff devices. No polling. No refresh.',
-    miniUI: <OrderMiniUI />,
-    col: 'md:col-span-2',
-    accentFrom: 'from-green-500',
-    accentTo: 'to-emerald-400',
-    badgeColor: 'text-green-700 bg-green-50 border-green-200',
-  },
-  {
-    id: 'insights',
-    badge: 'AI-Powered',
-    icon: <BarChart3 className="w-5 h-5" />,
-    title: 'Menu Intelligence',
-    desc: 'Surface your top-performing dishes, spot slow-movers, and optimise your menu based on real order data — not gut feel.',
-    miniUI: <MenuInsightsMiniUI />,
-    col: 'md:col-span-1',
-    accentFrom: 'from-brand-orange',
-    accentTo: 'to-brand-gold',
-    badgeColor: 'text-orange-700 bg-orange-50 border-orange-200',
-  },
-  {
-    id: 'staff',
-    badge: 'Team Sync',
-    icon: <Users className="w-5 h-5" />,
-    title: 'Staff Communication',
-    desc: 'Built-in role-based messaging. Kitchen alerts waiters. Managers broadcast updates. Everyone stays in sync, instantly.',
-    miniUI: <StaffChatMiniUI />,
-    col: 'md:col-span-1',
-    accentFrom: 'from-violet-500',
-    accentTo: 'to-purple-400',
-    badgeColor: 'text-violet-700 bg-violet-50 border-violet-200',
-  },
-];
+// ─── New Mini-UIs for Bento Grid ──────────────────────────────────────────────
+function TableAnalyticsMiniUI() {
+  const tables = [
+    { id: 'T-12', status: 'Occupied', time: '45m', bg: 'bg-brand-orange' },
+    { id: 'T-04', status: 'Reserved', time: '18:30', bg: 'bg-blue-500' },
+    { id: 'T-08', status: 'Available', time: '-', bg: 'bg-green-500' },
+  ];
+  return (
+    <div className="mt-6 space-y-3">
+      <div className="flex justify-between items-end mb-4">
+        <div>
+          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Occupancy</p>
+          <p className="text-2xl font-black text-gray-900 dark:text-white">84%</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Avg Turnover</p>
+          <p className="text-sm font-bold text-gray-900 dark:text-white">42 mins</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {tables.map(t => (
+          <div key={t.id} className="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center">
+            <span className={`w-2 h-2 rounded-full mb-2 ${t.bg}`} />
+            <p className="text-xs font-bold text-gray-900 dark:text-white">{t.id}</p>
+            <p className="text-[9px] text-gray-500 mt-0.5">{t.time}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
+function LedgerMiniUI() {
+  return (
+    <div className="mt-6 space-y-3">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="flex justify-between items-center mb-4">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Today's Revenue</p>
+          <p className="text-[10px] font-bold text-green-500 bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded-full">+14.5%</p>
+        </div>
+        <p className="text-3xl font-black text-gray-900 dark:text-white mb-4">₹42,850</p>
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-500">Dine-in</span>
+            <span className="font-bold text-gray-900 dark:text-white">₹32,400</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-500">Taxes</span>
+            <span className="font-bold text-gray-900 dark:text-white">₹4,200</span>
+          </div>
+        </div>
+        <div className="mt-4 h-1.5 w-full flex rounded-full overflow-hidden">
+          <div className="bg-brand-orange w-3/4"></div>
+          <div className="bg-brand-gold w-1/4"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Ecosystem Bento Section ──────────────────────────────────────────────────
 function FeaturesSection() {
   const { dark } = useContext(ThemeCtx);
+  
   return (
     <section id="features" className={`py-28 px-4 transition-colors duration-300 ${dark ? 'bg-[#0a0a0a]' : 'bg-[#fafaf9]'}`}>
       <div className="max-w-6xl mx-auto">
-
-        {/* Section Header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -511,93 +646,118 @@ function FeaturesSection() {
               ? 'text-brand-orange bg-brand-orange/20 border-brand-orange/30' 
               : 'text-brand-orange bg-brand-orange/10 border-brand-orange/20'
           }`}>
-            <Zap className="w-3 h-3" /> Core Features
+            <Zap className="w-3 h-3" /> The Ecosystem
           </span>
 
           <h2 className={`text-4xl md:text-5xl font-extrabold tracking-tight mb-5 leading-tight transition-colors duration-300 ${
             dark ? 'text-white' : 'text-gray-900'
           }`}>
-            Three pillars of a
-            <span className="bg-gradient-to-r from-brand-orange to-brand-gold bg-clip-text text-transparent"> seamless service.</span>
+            A masterclass in
+            <span className="bg-gradient-to-r from-brand-orange to-brand-gold bg-clip-text text-transparent"> efficiency.</span>
           </h2>
 
           <p className={`text-lg max-w-2xl mx-auto transition-colors duration-300 ${
             dark ? 'text-gray-400' : 'text-gray-500'
           }`}>
-            From the moment a guest places an order to the second it lands on their table — EasyDine orchestrates every step.
+            Purpose-built tools for every role in your restaurant. Beautifully designed. Incredibly fast.
           </p>
         </motion.div>
 
-        {/* 3-Column Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {FEATURES.map((f, i) => (
-            <motion.div
-              key={f.id}
-              className={`group bg-white border border-gray-100 rounded-3xl p-7 shadow-md shadow-black/4 hover:shadow-2xl hover:shadow-black/10 hover:-translate-y-1.5 transition-all duration-300 flex flex-col ${f.col}`}
-              initial={{ opacity: 0, y: 36 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {/* Top row: badge + icon */}
-              <div className="flex items-start justify-between mb-5">
-                <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wider uppercase border px-3 py-1 rounded-full ${f.badgeColor}`}>
-                  {f.icon} {f.badge}
-                </span>
-                {/* Decorative gradient blob */}
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.accentFrom} ${f.accentTo} opacity-15 group-hover:opacity-25 transition-opacity`} />
+        {/* Bento Grid layout */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 h-auto md:min-h-[500px]">
+          
+          {/* Card 1 - Real-time Analytics */}
+          <motion.div
+            className={`md:col-span-7 rounded-3xl p-8 border shadow-lg shadow-black/5 flex flex-col justify-between overflow-hidden relative group ${
+              dark ? 'bg-gray-900/60 border-white/10' : 'bg-white border-gray-100'
+            }`}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-brand-orange/20 to-transparent blur-3xl rounded-full -translate-y-1/2 translate-x-1/3" />
+            <div className="relative z-10 flex-1">
+              <div className="w-12 h-12 rounded-xl bg-brand-orange/10 text-brand-orange flex items-center justify-center mb-6">
+                <BarChart3 className="w-6 h-6" />
               </div>
-
-              {/* Title & description */}
-              <h3 className="text-xl font-extrabold text-gray-900 tracking-tight mb-2.5">{f.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
-
-              {/* Embedded Mini-UI */}
-              <div className="flex-1">
-                {f.miniUI}
-              </div>
-
-              {/* Bottom hover accent */}
-              <div className={`mt-6 h-0.5 w-0 bg-gradient-to-r ${f.accentFrom} ${f.accentTo} group-hover:w-full transition-all duration-500 rounded-full`} />
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Bottom stats strip */}
-        <motion.div
-          className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          {[
-            { value: '<200ms', label: 'Order sync latency' },
-            { value: '99.9%', label: 'Uptime SLA' },
-            { value: '4 Roles', label: 'Supported user types' },
-            { value: '3× faster', label: 'Table turnover rate' },
-          ].map((s) => (
-            <div key={s.label} className="bg-white border border-gray-100 rounded-2xl px-6 py-5 text-center shadow-sm">
-              <p className="text-2xl font-extrabold text-gray-900 mb-1">{s.value}</p>
-              <p className="text-xs text-gray-500 font-medium">{s.label}</p>
+              <h3 className={`text-2xl font-extrabold mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>Real-time Table Analytics</h3>
+              <p className={`text-sm max-w-md leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Visualize occupancy and turnover instantly. Gain granular insights into your floor performance without refreshing a single page.
+              </p>
             </div>
-          ))}
-        </motion.div>
+            <div className="relative z-10 w-full max-w-sm ml-auto mr-0 transition-transform duration-500 group-hover:translate-x-2">
+              <TableAnalyticsMiniUI />
+            </div>
+          </motion.div>
+
+          {/* Card 2 - Integrated Ledger */}
+          <motion.div
+            className={`md:col-span-5 rounded-3xl p-8 border shadow-lg shadow-black/5 flex flex-col justify-between overflow-hidden relative group ${
+              dark ? 'bg-gray-900/60 border-white/10' : 'bg-white border-gray-100'
+            }`}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-green-500/10 to-transparent blur-3xl rounded-full -translate-y-1/2 -translate-x-1/2" />
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center mb-6">
+                <Wallet className="w-6 h-6" />
+              </div>
+              <h3 className={`text-2xl font-extrabold mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>Integrated Ledger</h3>
+              <p className={`text-sm leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Manage restaurant finances with precision. Export daily settlements, track taxes, and handle refunds seamlessly.
+              </p>
+            </div>
+            <div className="relative z-10 transition-transform duration-500 group-hover:-translate-y-2">
+              <LedgerMiniUI />
+            </div>
+          </motion.div>
+
+          {/* Card 3 - Kitchen-Front Synergy (Full Width Bottom) */}
+          <motion.div
+            className={`md:col-span-12 rounded-3xl p-8 border shadow-lg shadow-black/5 flex flex-col md:flex-row items-center gap-8 overflow-hidden relative group ${
+              dark ? 'bg-gray-900/60 border-white/10' : 'bg-white border-gray-100'
+            }`}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="absolute right-0 bottom-0 w-96 h-96 bg-gradient-to-tl from-violet-500/10 to-transparent blur-3xl rounded-full translate-y-1/3 translate-x-1/3" />
+            
+            <div className="relative z-10 flex-1">
+              <div className="w-12 h-12 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center mb-6">
+                <Users className="w-6 h-6" />
+              </div>
+              <h3 className={`text-2xl font-extrabold mb-3 ${dark ? 'text-white' : 'text-gray-900'}`}>Kitchen-Front Synergy</h3>
+              <p className={`text-sm max-w-lg leading-relaxed ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Bridge the gap between your chefs and waitstaff. Role-aware alerts and real-time order updates ensure everyone is on exactly the same page.
+              </p>
+            </div>
+            
+            <div className="relative z-10 w-full md:w-1/2 lg:w-1/3 transition-transform duration-500 group-hover:scale-[1.02]">
+              <div className="bg-gray-50/80 dark:bg-gray-800/80 p-4 rounded-2xl backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                <StaffChatMiniUI />
+              </div>
+            </div>
+          </motion.div>
+
+        </div>
       </div>
     </section>
   );
 }
 
 // ─── Trusted By Marquee ───────────────────────────────────────────────────────
-const brands = [
-  { name: 'Zomato', letter: 'Z', color: '#e23744' },
-  { name: 'Swiggy', letter: 'S', color: '#fc8019' },
-  { name: 'OpenTable', letter: 'O', color: '#d4192c' },
-  { name: 'Resy', letter: 'R', color: '#000000' },
-  { name: 'SevenRooms', letter: '7', color: '#1a1a2e' },
-  { name: 'TableAgent', letter: 'T', color: '#2563eb' },
-  { name: 'Yelp', letter: 'Y', color: '#d32323' },
-  { name: 'Toast', letter: 'T', color: '#ff4c00' },
+const featuresList = [
+  { name: 'Real-time Kitchen Updates', icon: '🔥', color: '#e23744' },
+  { name: 'Seamless Reservations', icon: '📅', color: '#fc8019' },
+  { name: 'Finance Tracking', icon: '💰', color: '#1a1a2e' },
+  { name: 'Analytics Dashboard', icon: '📊', color: '#2563eb' },
+  { name: 'Floor Management', icon: '🗺️', color: '#ff4c00' },
 ];
 
 function BrandChip({ b }) {
@@ -606,7 +766,7 @@ function BrandChip({ b }) {
       <span
         className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
         style={{ backgroundColor: b.color }}
-      >{b.letter}</span>
+      >{b.icon}</span>
       <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">{b.name}</span>
     </div>
   );
@@ -616,7 +776,7 @@ function TrustedBySection() {
   const { dark } = useContext(ThemeCtx);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
-  const allBrands = [...brands, ...brands]; // duplicate for seamless loop
+  const allBrands = [...featuresList, ...featuresList, ...featuresList]; // duplicate for seamless loop
 
   return (
     <section ref={ref} className={`py-20 border-y overflow-hidden transition-colors duration-300 ${dark ? 'bg-[#0f0f0f] border-white/10' : 'bg-[#fafaf9] border-gray-100'}`}>
@@ -626,7 +786,7 @@ function TrustedBySection() {
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5 }}
       >
-        <p className="text-xs font-semibold tracking-widest uppercase text-gray-400">Trusted by teams at</p>
+        <p className="text-xs font-semibold tracking-widest uppercase text-gray-400">Platform Features</p>
       </motion.div>
 
       {/* Marquee track */}
@@ -857,15 +1017,82 @@ const REAL_FEATURES = [
 ];
 
 const COMING_SOON = [
-  { icon: '🤖', title: 'AI Menu Intelligence', desc: 'Predictive dish recommendations powered by customer order history.' },
-  { icon: '💬', title: 'Staff Chatbots', desc: 'Built-in internal communication with role-aware automated alerts.' },
-  { icon: '📦', title: 'Automated Inventory', desc: 'AI-driven stock management that forecasts depletion before it happens.' },
+  { icon: '🤖', title: 'AI Menu Intelligence', desc: 'Predictive dish recommendations powered by customer order history.', component: null },
+  { icon: '💬', title: 'Staff Communication', desc: 'Built-in internal communication with role-aware automated alerts.', component: <div className="mt-4 opacity-70 grayscale hover:grayscale-0 transition-all"><StaffChatMiniUI /></div> },
+  { icon: '📦', title: 'Automated Inventory', desc: 'AI-driven stock management that forecasts depletion before it happens.', component: null },
 ];
+
+// ─── About Section (Phase 1) ────────────────────────────────────────────────────
+function AboutSection() {
+  const { dark } = useContext(ThemeCtx);
+  return (
+    <section id="about" className={`py-28 px-4 transition-colors duration-300 ${dark ? 'bg-[#0f0f0f]' : 'bg-white'}`}>
+      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
+
+        {/* Left Column: Header */}
+        <div className="flex-1 text-center lg:text-left lg:sticky lg:top-32">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className={`inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6 border ${
+              dark
+                ? 'text-brand-orange bg-brand-orange/20 border-brand-orange/30'
+                : 'text-brand-orange bg-brand-orange/10 border-brand-orange/20'
+            }`}>
+              <Star className="w-3 h-3" /> Our Vision
+            </span>
+            <h2 className={`text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight ${dark ? 'text-white' : 'text-gray-900'}`}>
+              The Genesis of
+              <span className="block bg-gradient-to-r from-brand-orange to-brand-gold bg-clip-text text-transparent pb-2">EasyDine.</span>
+            </h2>
+            <div className="w-20 h-1.5 bg-gradient-to-r from-brand-orange to-brand-gold rounded-full mx-auto lg:mx-0"></div>
+          </motion.div>
+        </div>
+
+        {/* Right Column: Body Text */}
+        <div
+          className={`flex-1 rounded-3xl p-8 md:p-10 shadow-xl transition-colors duration-300 ${
+            dark
+              ? 'bg-gray-900/60 border border-white/10 shadow-black/20'
+              : 'bg-white border border-gray-100 shadow-black/5'
+          }`}
+        >
+          <div className="space-y-8">
+            <motion.p
+              className={`text-base md:text-lg leading-relaxed font-bold tracking-tight ${dark ? 'text-gray-400' : 'text-gray-600'} [text-justify:inter-word] text-justify`}
+              style={{ textAlignLast: 'left' }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              Traditional dining often suffers from invisible friction. Orders get lost in the noise, tables sit uncleaned while guests wait, and manual ticket-running creates a bottleneck that slows down the heartbeat of the kitchen. This chaos isn't just a service issue — it's a bottom-line issue.
+            </motion.p>
+            <motion.p
+              className={`text-base md:text-lg leading-relaxed font-bold tracking-tight ${dark ? 'text-gray-400' : 'text-gray-600'} [text-justify:inter-word] text-justify`}
+              style={{ textAlignLast: 'left' }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+            >
+              Our mission was to eliminate these manual delays by connecting front-of-house staff directly to kitchen displays in real-time. By integrating every touchpoint — from table-turnover analytics to a precision financial ledger — we’ve created an ecosystem that thinks like a restaurateur, not a software checklist.
+            </motion.p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+}
 
 function ProjectFeaturesSection() {
   const { dark } = useContext(ThemeCtx);
   return (
-    <section id="about" className={`py-28 px-4 transition-colors duration-300 ${dark ? 'bg-[#0f0f0f]' : 'bg-white'}`}>
+    <section id="roadmap" className={`py-28 px-4 transition-colors duration-300 ${dark ? 'bg-[#0a0a0a]' : 'bg-[#fafaf9]'}`}>
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
@@ -921,6 +1148,7 @@ function ProjectFeaturesSection() {
                 <span className="text-3xl mb-4 block grayscale">{f.icon}</span>
                 <h3 className={`text-lg font-extrabold mb-2 ${dark ? 'text-gray-400' : 'text-gray-600'}`}>{f.title}</h3>
                 <p className={`text-sm leading-relaxed ${dark ? 'text-gray-600' : 'text-gray-400'}`}>{f.desc}</p>
+                {f.component && f.component}
               </div>
             </SpringReveal>
           ))}
@@ -943,6 +1171,7 @@ export default function LandingPage() {
         <HeroSection />
         <TrustedBySection />
         <FeaturesSection />
+        <AboutSection />
         <ProjectFeaturesSection />
         <CTASection />
         <Footer />
