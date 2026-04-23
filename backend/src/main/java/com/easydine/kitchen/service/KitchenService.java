@@ -6,7 +6,11 @@ import com.easydine.orders.dto.OrderResponse;
 import com.easydine.orders.entity.Order;
 import com.easydine.orders.entity.OrderStatus;
 import com.easydine.orders.repository.OrderRepository;
+import com.easydine.kitchen.entity.KitchenOrder;
+import com.easydine.kitchen.repository.KitchenOrderRepository;
+import com.easydine.common.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,27 +23,50 @@ import java.util.stream.Collectors;
 public class KitchenService {
 
     private final OrderRepository orderRepository;
+    private final KitchenOrderRepository kitchenOrderRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public List<OrderResponse> getActiveOrders() {
-        return orderRepository.findByStatusInOrderByCreatedAtAsc(
-                Arrays.asList(OrderStatus.PLACED, OrderStatus.IN_KITCHEN)
+        return kitchenOrderRepository.findByStatusInOrderByReceivedAtAsc(
+                Arrays.asList(OrderStatus.PLACED, OrderStatus.PREPARING, OrderStatus.COOKING, OrderStatus.PLATING)
         ).stream()
-        .map(this::mapToResponse)
+        .map(ko -> mapToResponse(ko.getOrder(), ko))
         .collect(Collectors.toList());
     }
 
     @Transactional
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+        KitchenOrder ko = kitchenOrderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Kitchen order not found for order id: " + orderId));
         
+        ko.setStatus(newStatus);
+        if (newStatus == OrderStatus.PREPARING && ko.getStartedAt() == null) {
+            ko.setStartedAt(java.time.LocalDateTime.now());
+        } else if (newStatus == OrderStatus.READY && ko.getCompletedAt() == null) {
+            ko.setCompletedAt(java.time.LocalDateTime.now());
+            // Send notification to customer
+            notificationService.sendNotification(ko.getOrder().getUser(), "Your food is ready 🍽️ Order #" + ko.getOrder().getId());
+        }
+        kitchenOrderRepository.save(ko);
+
+        // Sync with main order
+        Order order = ko.getOrder();
         order.setStatus(newStatus);
-        Order savedOrder = orderRepository.save(order);
-        return mapToResponse(savedOrder);
+        orderRepository.save(order);
+
+        OrderResponse response = mapToResponse(order, ko);
+        broadcastActiveOrders();
+        return response;
     }
 
-    private OrderResponse mapToResponse(Order order) {
+    public void broadcastActiveOrders() {
+        List<OrderResponse> activeOrders = getActiveOrders();
+        messagingTemplate.convertAndSend("/topic/kitchen/orders", activeOrders);
+    }
+
+    private OrderResponse mapToResponse(Order order, KitchenOrder kitchenOrder) {
         List<OrderItemResponse> items = order.getOrderItems().stream()
                 .map(item -> OrderItemResponse.builder()
                         .id(item.getId())
@@ -62,7 +89,7 @@ public class KitchenService {
                 .orderNumber(order.getOrderNumber())
                 .orderDate(order.getOrderDate())
                 .createdAt(order.getCreatedAt())
-                .estimatedMinutes(order.getEstimatedMinutes())
+                .estimatedMinutes(kitchenOrder != null ? kitchenOrder.getEstimatedMinutes() : order.getEstimatedMinutes())
                 .items(items)
                 .build();
     }

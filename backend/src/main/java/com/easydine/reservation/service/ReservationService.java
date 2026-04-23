@@ -68,18 +68,18 @@ public class ReservationService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return reservationRepository.findByUserId(user.getId()).stream()
+        return reservationRepository.findByUserIdOrderByCreatedAtDesc(user.getId()).stream()
                 .map(reservationMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public List<ReservationDTO> getReservationsAdmin(LocalDate date, ReservationStatus status) {
         if (date != null && status != null) {
-            return reservationRepository.findByReservationDateAndStatus(date, status).stream()
+            return reservationRepository.findByReservationDateAndStatusOrderByCreatedAtDesc(date, status).stream()
                     .map(reservationMapper::toDto)
                     .collect(Collectors.toList());
         }
-        return reservationRepository.findAll().stream()
+        return reservationRepository.findAllByOrderByCreatedAtDesc().stream()
                 .map(reservationMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -104,8 +104,13 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
-        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
-            throw new RuntimeException("Only CONFIRMED reservations can be checked in");
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED && reservation.getStatus() != ReservationStatus.PENDING) {
+            throw new RuntimeException("Only PENDING or CONFIRMED reservations can be checked in");
+        }
+
+        // Auto-confirm if pending
+        if (reservation.getStatus() == ReservationStatus.PENDING) {
+            reservation.setStatus(ReservationStatus.CONFIRMED);
         }
 
         // Table becomes OCCUPIED

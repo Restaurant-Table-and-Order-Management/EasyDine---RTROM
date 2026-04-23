@@ -37,7 +37,7 @@ export default function MyOrdersPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-6">
         <div>
           <h1 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
-            My Order
+            My Orders
           </h1>
           <p className="text-gray-500 font-medium">Track your delicious meals and review your history</p>
         </div>

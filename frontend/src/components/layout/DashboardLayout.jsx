@@ -222,7 +222,7 @@ export default function DashboardLayout() {
                   </span>
                 )}
               </div>
-              <span className="text-sm font-bold">My Order</span>
+              <span className="text-sm font-bold">Cart</span>
             </button>
           )}
         </header>

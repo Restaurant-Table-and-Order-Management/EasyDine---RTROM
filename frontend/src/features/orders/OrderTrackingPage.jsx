@@ -10,7 +10,8 @@ import {
   ShoppingBag,
   MoreVertical,
   Timer,
-  ChefHat
+  ChefHat,
+  Flame
 } from 'lucide-react';
 import useDataStore from '../../store/dataStore';
 import useCartStore from '../../store/cartStore';
@@ -21,6 +22,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ReorderButton from './ReorderButton';
 import api from '../../api/axiosConfig';
 import { formatTime } from '../../utils/dateHelpers';
+import toast from 'react-hot-toast';
 
 export default function OrderTrackingPage() {
   const { id: reservationId } = useParams();
@@ -57,6 +59,53 @@ export default function OrderTrackingPage() {
     }
   };
 
+  const { confirmPayment } = useDataStore();
+
+  const handlePayment = async () => {
+    if (!bill || bill.grandTotal <= 0) {
+      toast.error('No pending bill amount');
+      return;
+    }
+
+    const options = {
+      key: "rzp_test_fake_key_id", // Enter the Key ID generated from the Dashboard
+      amount: Math.round(bill.grandTotal * 100), // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+      currency: "INR",
+      name: "EasyDine Restaurant",
+      description: "Dining Session Payment",
+      image: "https://example.com/your_logo",
+      handler: async function (response) {
+        // Since we don't have a secret key for backend verification,
+        // we'll proceed directly to confirm the payment on our server.
+        const loadingToast = toast.loading('Verifying payment...');
+        const res = await confirmPayment(reservationId);
+        if (res.success) {
+          toast.success('Payment Successful!', { id: loadingToast });
+          fetchSessionData(); // Refresh the page state
+        } else {
+          toast.error(res.message, { id: loadingToast });
+        }
+      },
+      prefill: {
+        name: reservation.customerName || "Customer",
+        email: "customer@example.com",
+        contact: "9999999999"
+      },
+      notes: {
+        address: "EasyDine Office"
+      },
+      theme: {
+        color: "#ff7b00"
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', function (response) {
+      toast.error('Payment failed: ' + response.error.description);
+    });
+    rzp.open();
+  };
+
   useEffect(() => {
     fetchSessionData();
     // Poll for status updates every 15 seconds
@@ -68,9 +117,11 @@ export default function OrderTrackingPage() {
     const steps = {
       'PENDING': 0,
       'PLACED': 1,
-      'IN_KITCHEN': 2,
-      'READY': 3,
-      'SERVED': 4,
+      'PREPARING': 2,
+      'COOKING': 3,
+      'PLATING': 4,
+      'READY': 5,
+      'SERVED': 6,
       'CANCELLED': 0
     };
     return steps[status] || 0;
@@ -144,7 +195,7 @@ export default function OrderTrackingPage() {
 
                 <div className="p-6">
                   {/* Estimation Alert */}
-                  {order.status === 'IN_KITCHEN' && order.estimatedMinutes && (
+                  {['PREPARING', 'COOKING', 'PLATING'].includes(order.status) && order.estimatedMinutes && (
                     <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20 rounded-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-white dark:bg-surface-dark rounded-lg shadow-sm">
@@ -166,9 +217,10 @@ export default function OrderTrackingPage() {
                       <div className="flex justify-between items-center">
                         {[
                           { label: 'Placed', icon: Timer },
-                          { label: 'In Kitchen', icon: ChefHat },
-                          { label: 'Ready', icon: ShoppingBag },
-                          { label: 'Served', icon: CheckCircle2 }
+                          { label: 'Preparing', icon: ChefHat },
+                          { label: 'Cooking', icon: Flame },
+                          { label: 'Plating', icon: Utensils },
+                          { label: 'Ready', icon: ShoppingBag }
                         ].map((step, i) => {
                           const stepId = i + 1;
                           const currentStep = getStatusStep(order.status);
@@ -261,6 +313,18 @@ export default function OrderTrackingPage() {
                     </span>
                 </div>
               </div>
+              
+              {reservation.status !== 'COMPLETED' && (
+                <div className="p-4 mt-2">
+                  <Button 
+                    fullWidth 
+                    onClick={handlePayment}
+                    className="bg-white text-brand-orange hover:bg-gray-100 border-none shadow-lg font-black"
+                  >
+                    Pay & Complete Session
+                  </Button>
+                </div>
+              )}
             </div>
           </Card>
 
