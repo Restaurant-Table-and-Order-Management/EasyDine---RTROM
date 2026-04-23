@@ -1,5 +1,6 @@
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { API_BASE_URL } from '../utils/constants';
 
 class WebSocketService {
     constructor() {
@@ -8,7 +9,7 @@ class WebSocketService {
         this.onConnectCallbacks = [];
     }
 
-    connect(url = 'http://localhost:8080/ws') {
+    connect(url = `${API_BASE_URL}/ws`) {
         if (this.client && this.client.active) return;
 
         this.client = new Client({

@@ -41,8 +41,8 @@ export default function KitchenTicket({ order, onUpdateStatus }) {
   const handleStatusClick = async (manualEstimate = null) => {
     setIsUpdating(true);
     let nextStatus;
-    if (order.status === 'PLACED') nextStatus = 'IN_KITCHEN';
-    else if (order.status === 'IN_KITCHEN') nextStatus = 'READY';
+    if (order.status === 'PLACED') nextStatus = 'PREPARING';
+    else if (order.status === 'PREPARING') nextStatus = 'READY';
     else nextStatus = 'SERVED';
     
     if (order.status === 'PLACED' && !showEstimates && manualEstimate === null) {
@@ -188,10 +188,10 @@ export default function KitchenTicket({ order, onUpdateStatus }) {
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Mark Ready
                 </>
-              ) : order.status === 'IN_KITCHEN' ? (
+              ) : order.status === 'PREPARING' ? (
                 <>
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Mark Served
+                  Mark Ready
                 </>
               ) : (
                 <>

@@ -11,8 +11,10 @@ import {
   MoreVertical,
   Timer,
   ChefHat,
-  Flame
+  Flame,
+  Download
 } from 'lucide-react';
+import { generateSafeInvoicePDF } from '../../utils/pdfGenerator';
 import useDataStore from '../../store/dataStore';
 import useCartStore from '../../store/cartStore';
 import Card from '../../components/ui/Card';
@@ -23,6 +25,7 @@ import ReorderButton from './ReorderButton';
 import api from '../../api/axiosConfig';
 import { formatTime } from '../../utils/dateHelpers';
 import toast from 'react-hot-toast';
+import PaymentModal from '../../components/orders/PaymentModal';
 
 export default function OrderTrackingPage() {
   const { id: reservationId } = useParams();
@@ -32,6 +35,7 @@ export default function OrderTrackingPage() {
   const [loading, setLoading] = useState(true);
   const [reservation, setReservation] = useState(null);
   const [bill, setBill] = useState(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const fetchSessionData = async () => {
     try {
@@ -66,44 +70,40 @@ export default function OrderTrackingPage() {
       toast.error('No pending bill amount');
       return;
     }
+    setIsPaymentModalOpen(true);
+  };
 
-    const options = {
-      key: "rzp_test_fake_key_id", // Enter the Key ID generated from the Dashboard
-      amount: Math.round(bill.grandTotal * 100), // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-      currency: "INR",
-      name: "EasyDine Restaurant",
-      description: "Dining Session Payment",
-      image: "https://example.com/your_logo",
-      handler: async function (response) {
-        // Since we don't have a secret key for backend verification,
-        // we'll proceed directly to confirm the payment on our server.
-        const loadingToast = toast.loading('Verifying payment...');
-        const res = await confirmPayment(reservationId);
+  const handleConfirmFinalPayment = async (method) => {
+    setIsPaymentModalOpen(false);
+    const loadingToast = toast.loading('Settling your session...');
+    try {
+        const res = await confirmPayment(reservationId, method);
         if (res.success) {
-          toast.success('Payment Successful!', { id: loadingToast });
-          fetchSessionData(); // Refresh the page state
+          toast.success('Session Completed Successfully!', { id: loadingToast });
+          fetchSessionData(); // Refresh the page state to show 'PAID' and 'Download'
         } else {
           toast.error(res.message, { id: loadingToast });
         }
-      },
-      prefill: {
-        name: reservation.customerName || "Customer",
-        email: "customer@example.com",
-        contact: "9999999999"
-      },
-      notes: {
-        address: "EasyDine Office"
-      },
-      theme: {
-        color: "#ff7b00"
-      }
-    };
+    } catch (err) {
+        toast.error('Failed to complete payment. Please try again.', { id: loadingToast });
+    }
+  };
 
-    const rzp = new window.Razorpay(options);
-    rzp.on('payment.failed', function (response) {
-      toast.error('Payment failed: ' + response.error.description);
-    });
-    rzp.open();
+  const handleDownloadInvoice = async (res) => {
+    const loadingToast = toast.loading('Generating your invoice...');
+    try {
+        // bill is already in state from fetchSessionData, but let's be safe
+        if (!bill) {
+          const resBill = await api.get(`/billing/reservation/${reservationId}`);
+          const billData = resBill.data || resBill;
+          generateSafeInvoicePDF(billData, res);
+        } else {
+          generateSafeInvoicePDF(bill, res);
+        }
+        toast.success('Invoice downloaded', { id: loadingToast });
+    } catch (err) {
+        toast.error('Error generating PDF', { id: loadingToast });
+    }
   };
 
   useEffect(() => {
@@ -291,7 +291,9 @@ export default function OrderTrackingPage() {
                   <Utensils className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold opacity-80 uppercase tracking-widest">Running Total</h4>
+                  <h4 className="text-sm font-bold opacity-80 uppercase tracking-widest">
+                    {reservation.status === 'COMPLETED' ? 'Total Paid' : 'Running Total'}
+                  </h4>
                   <p className="text-3xl font-black">₹{(bill?.grandTotal || 0).toFixed(2)}</p>
                 </div>
               </div>
@@ -304,37 +306,50 @@ export default function OrderTrackingPage() {
                     <span className="opacity-80">GST (5%)</span>
                     <span className="font-bold">₹{(bill?.taxAmount || 0).toFixed(2)}</span>
                 </div>
+                
+                {reservation.status === 'COMPLETED' && (
+                  <div className="flex justify-between items-center text-sm pt-2 mt-2 border-t border-white/10">
+                      <span className="font-black uppercase tracking-tighter">Balance Due</span>
+                      <span className="font-black px-2 py-0.5 bg-white text-green-600 rounded-lg">₹0.00</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between items-center text-sm">
                     <span className="opacity-80">Payment Status</span>
                     <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase ${
-                      reservation.status === 'COMPLETED' ? 'bg-green-500 text-white' : 'bg-white/20 text-white'
+                      reservation.status === 'COMPLETED' ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-white/20 text-white'
                     }`}>
                       {reservation.status === 'COMPLETED' ? 'PAID' : 'UNPAID'}
                     </span>
                 </div>
                 
                 {reservation.status !== 'COMPLETED' && bill?.grandTotal > 0 && (
-                   <Button 
-                     fullWidth 
-                     onClick={() => navigate('/payments')}
-                     className="mt-4 bg-white text-brand-orange hover:bg-gray-50 border-none font-black uppercase tracking-tighter"
-                   >
-                      Proceed to Payment
-                   </Button>
+                   <div className="pt-4 mt-2">
+                     <Button 
+                       fullWidth 
+                       variant="secondary"
+                       onClick={handlePayment}
+                       className="bg-white !text-brand-orange hover:bg-gray-50 border-none font-black uppercase tracking-widest shadow-xl py-4"
+                     >
+                        Pay & Complete Session
+                     </Button>
+                     <p className="text-[9px] text-white/60 text-center mt-3 uppercase font-bold tracking-widest">
+                       Secure Checkout with Razorpay
+                     </p>
+                   </div>
                 )}
-              </div>
-              
-              {reservation.status !== 'COMPLETED' && (
-                <div className="p-4 mt-2">
+
+                {reservation.status === 'COMPLETED' && (
                   <Button 
                     fullWidth 
-                    onClick={handlePayment}
-                    className="bg-white text-brand-orange hover:bg-gray-100 border-none shadow-lg font-black"
+                    variant="secondary"
+                    onClick={() => handleDownloadInvoice(reservation)}
+                    className="mt-4 bg-white/20 !text-white border-none backdrop-blur-md hover:bg-white/30 font-black"
                   >
-                    Pay & Complete Session
+                    <Download className="w-4 h-4 mr-2" /> Download Bill
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </Card>
 
@@ -362,6 +377,12 @@ export default function OrderTrackingPage() {
           </Card>
         </div>
       </div>
+      <PaymentModal 
+        isOpen={isPaymentModalOpen} 
+        onClose={() => setIsPaymentModalOpen(false)}
+        onConfirm={handleConfirmFinalPayment}
+        amount={bill?.grandTotal || 0}
+      />
     </div>
   );
 }

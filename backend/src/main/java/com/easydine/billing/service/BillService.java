@@ -31,6 +31,7 @@ public class BillService {
 
     private final OrderRepository orderRepository;
     private final ReservationRepository reservationRepository;
+    private final com.easydine.billing.repository.BillRepository billRepository;
     
     private static final BigDecimal TAX_RATE = new BigDecimal("0.05");
     private static final BigDecimal ONE_PLUS_TAX = BigDecimal.ONE.add(TAX_RATE);
@@ -89,7 +90,7 @@ public class BillService {
                 .build();
     }
 
-    public void confirmPayment(Long reservationId) {
+    public void confirmPayment(Long reservationId, String paymentMethod) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
         
@@ -103,6 +104,19 @@ public class BillService {
         }
         
         reservationRepository.save(reservation);
+
+        // Save permanent bill record
+        com.easydine.billing.entity.Bill bill = com.easydine.billing.entity.Bill.builder()
+                .billNumber("ED-BILL-" + System.currentTimeMillis())
+                .reservation(reservation)
+                .subtotal(finalBill.getSubtotal())
+                .taxAmount(finalBill.getTaxAmount())
+                .discountAmount(finalBill.getDiscountAmount())
+                .grandTotal(finalBill.getGrandTotal())
+                .paymentMethod(paymentMethod != null ? paymentMethod : "UNKNOWN")
+                .build();
+        
+        billRepository.save(bill);
     }
 
     public RevenueReportResponse getRevenueReport() {

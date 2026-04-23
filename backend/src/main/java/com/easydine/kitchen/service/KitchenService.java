@@ -1,22 +1,24 @@
 package com.easydine.kitchen.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.easydine.common.exception.ResourceNotFoundException;
+import com.easydine.common.service.NotificationService;
+import com.easydine.kitchen.entity.KitchenOrder;
+import com.easydine.kitchen.repository.KitchenOrderRepository;
 import com.easydine.orders.dto.OrderItemResponse;
 import com.easydine.orders.dto.OrderResponse;
 import com.easydine.orders.entity.Order;
 import com.easydine.orders.entity.OrderStatus;
 import com.easydine.orders.repository.OrderRepository;
-import com.easydine.kitchen.entity.KitchenOrder;
-import com.easydine.kitchen.repository.KitchenOrderRepository;
-import com.easydine.common.service.NotificationService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +31,8 @@ public class KitchenService {
 
     @Transactional(readOnly = true)
     public List<OrderResponse> getActiveOrders() {
-        return orderRepository.findByStatusInOrderByCreatedAtAsc(
-                Arrays.asList(OrderStatus.PLACED, OrderStatus.IN_KITCHEN, OrderStatus.READY)
+        return kitchenOrderRepository.findByStatusInOrderByReceivedAtAsc(
+                Arrays.asList(OrderStatus.PLACED, OrderStatus.PREPARING, OrderStatus.READY)
         ).stream()
         .map(ko -> mapToResponse(ko.getOrder(), ko))
         .collect(Collectors.toList());

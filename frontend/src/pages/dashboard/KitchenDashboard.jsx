@@ -124,7 +124,7 @@ export default function KitchenDashboard() {
         {/* Filter Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex bg-white dark:bg-surface-dark p-1 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm w-full sm:w-auto">
-                {['ALL', 'PLACED', 'IN_KITCHEN', 'READY'].map((status) => (
+                {['ALL', 'PLACED', 'PREPARING', 'READY'].map((status) => (
                     <button
                         key={status}
                         onClick={() => setFilterStatus(status)}

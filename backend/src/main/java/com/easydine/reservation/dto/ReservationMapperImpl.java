@@ -24,6 +24,7 @@ public class ReservationMapperImpl implements ReservationMapper {
                 .guestCount(entity.getGuestCount())
                 .status(entity.getStatus())
                 .specialRequests(entity.getSpecialRequests())
+                .totalPaid(entity.getTotalPaid())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -40,6 +41,7 @@ public class ReservationMapperImpl implements ReservationMapper {
                 .guestCount(dto.getGuestCount())
                 .status(dto.getStatus())
                 .specialRequests(dto.getSpecialRequests())
+                .totalPaid(dto.getTotalPaid())
                 .build();
     }
 }

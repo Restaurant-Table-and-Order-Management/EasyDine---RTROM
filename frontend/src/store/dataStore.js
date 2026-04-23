@@ -156,9 +156,9 @@ const useDataStore = create((set, get) => ({
     }
   },
 
-  confirmPayment: async (reservationId) => {
+  confirmPayment: async (reservationId, paymentMethod) => {
     try {
-      await api.post(`/billing/confirm/${reservationId}`);
+      await api.post(`/billing/confirm/${reservationId}`, null, { params: { paymentMethod } });
       return { success: true };
     } catch (error) {
       return { success: false, message: 'Payment confirmation failed' };

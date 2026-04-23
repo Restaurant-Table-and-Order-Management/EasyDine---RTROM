@@ -24,8 +24,10 @@ public class BillingController {
     }
 
     @PostMapping("/confirm/{reservationId}")
-    public ResponseEntity<Void> confirmPayment(@PathVariable Long reservationId) {
-        billService.confirmPayment(reservationId);
+    public ResponseEntity<Void> confirmPayment(
+            @PathVariable Long reservationId, 
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String paymentMethod) {
+        billService.confirmPayment(reservationId, paymentMethod);
         return ResponseEntity.ok().build();
     }
 

@@ -28,6 +28,7 @@ public class ReservationDTO {
     private Integer guestCount;
     private ReservationStatus status;
     private String specialRequests;
+    private java.math.BigDecimal totalPaid;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
