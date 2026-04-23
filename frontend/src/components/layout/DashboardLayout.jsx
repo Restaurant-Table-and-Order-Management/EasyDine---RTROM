@@ -45,7 +45,9 @@ export default function DashboardLayout() {
     fetchMyReservations,
     notifications,
     addNotification,
-    markNotificationsAsRead
+    markNotificationsAsRead,
+    myOrders,
+    fetchMyOrders
   } = useDataStore();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,10 +56,11 @@ export default function DashboardLayout() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [activePopup, setActivePopup] = useState(null);
   
+  const notifRef = useRef(null);
+  
   const { getTotalItems } = useCartStore();
   const cartItemCount = getTotalItems();
 
-  const notifiedIds = useRef(new Set());
   const role = user?.role || 'CUSTOMER';
 
   // Global Notification Polling
@@ -65,14 +68,40 @@ export default function DashboardLayout() {
     if (role !== 'CUSTOMER') return;
 
     fetchMyReservations(true); // Initial silent fetch
-    const pollInterval = setInterval(() => fetchMyReservations(true), 5000);
+    fetchMyOrders(true); // Initial silent fetch
+    
+    const pollInterval = setInterval(() => {
+      fetchMyReservations(true);
+      fetchMyOrders(true);
+    }, 5000);
+    
     return () => clearInterval(pollInterval);
-  }, [role, fetchMyReservations]);
+  }, [role, fetchMyReservations, fetchMyOrders]);
 
-  // Global Notification Trigger
+  const notifiedIds = useRef(new Set());
+
+  // Load notified IDs from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('notified_reservations');
+    if (saved) {
+      try {
+        const ids = JSON.parse(saved);
+        if (Array.isArray(ids)) {
+          ids.forEach(id => notifiedIds.current.add(id));
+        }
+      } catch (e) {
+        console.error('Error parsing notified IDs', e);
+      }
+    }
+  }, []);
+
+  const notifiedOrderIds = useRef(new Map()); // id -> lastKnownStatus
+
+  // Global Notification Trigger for Reservations
   useEffect(() => {
     if (role !== 'CUSTOMER') return;
 
+    // We only trigger for CONFIRMED bookings that haven't been notified in this browser/session before
     const pendingToConfirmed = reservations.find(r => 
       r.status === 'CONFIRMED' && !notifiedIds.current.has(r.id)
     );
@@ -80,9 +109,12 @@ export default function DashboardLayout() {
     if (pendingToConfirmed) {
       setActivePopup(pendingToConfirmed);
       playConfirmationChime();
-      notifiedIds.current.add(pendingToConfirmed.id);
       
-      // Add to persistent notification list
+      // Update local set and persist to localStorage
+      notifiedIds.current.add(pendingToConfirmed.id);
+      localStorage.setItem('notified_reservations', JSON.stringify(Array.from(notifiedIds.current)));
+      
+      // Add to persistent notification list in store
       addNotification({
         type: 'RESERVATION_CONFIRMED',
         title: 'Booking Confirmed!',
@@ -92,7 +124,52 @@ export default function DashboardLayout() {
     }
   }, [reservations, role, addNotification]);
 
+  // Global Notification Trigger for Orders
+  useEffect(() => {
+    if (role !== 'CUSTOMER') return;
+
+    myOrders.forEach(order => {
+      const lastStatus = notifiedOrderIds.current.get(order.id);
+      
+      // Trigger notification if status changed to READY or SERVED
+      if (lastStatus && lastStatus !== order.status) {
+        if (order.status === 'READY') {
+          playConfirmationChime();
+          addNotification({
+            type: 'ORDER_READY',
+            title: 'Order Ready! 🍳',
+            message: `Your order #${order.id.toString().slice(-4)} is ready to be served.`,
+            data: order
+          });
+        } else if (order.status === 'SERVED') {
+          addNotification({
+            type: 'ORDER_SERVED',
+            title: 'Enjoy your meal! 🍽️',
+            message: `Order #${order.id.toString().slice(-4)} has been served at your table.`,
+            data: order
+          });
+        }
+      }
+      
+      // Update last known status
+      notifiedOrderIds.current.set(order.id, order.status);
+    });
+  }, [myOrders, role, addNotification]);
+
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Handle click outside notification panel
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setNotifOpen(false);
+      }
+    }
+    if (notifOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [notifOpen]);
 
   const handleLogout = () => {
     logout();
@@ -122,7 +199,7 @@ export default function DashboardLayout() {
             <ChefHat className="w-5 h-5 text-white" />
           </div>
           {!sidebarCollapsed && (
-            <div className="animate-fade-in">
+            <div>
               <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
                 EasyDine
               </h1>
@@ -166,7 +243,7 @@ export default function DashboardLayout() {
               }
             >
               {IconComponent && <IconComponent className="w-5 h-5 flex-shrink-0" />}
-              {!sidebarCollapsed && <span className="animate-fade-in">{item.label}</span>}
+              {!sidebarCollapsed && <span>{item.label}</span>}
             </NavLink>
           );
         })}
@@ -177,7 +254,7 @@ export default function DashboardLayout() {
         <ThemeToggle collapsed={sidebarCollapsed} />
 
         {!sidebarCollapsed && (
-          <div className="flex items-center gap-3 px-3 py-2 animate-fade-in">
+          <div className="flex items-center gap-3 px-3 py-2">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-orange to-brand-gold flex items-center justify-center text-white text-xs font-bold shadow-md">
               {getInitials(user?.name)}
             </div>
@@ -265,7 +342,7 @@ export default function DashboardLayout() {
           {role === 'CUSTOMER' && (
             <>
               {/* Notification Center */}
-              <div className="relative">
+              <div className="relative" ref={notifRef}>
                 <button 
                   onClick={() => {
                     setNotifOpen(!notifOpen);

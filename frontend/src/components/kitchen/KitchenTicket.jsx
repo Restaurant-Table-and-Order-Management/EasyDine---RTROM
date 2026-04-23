@@ -40,7 +40,10 @@ export default function KitchenTicket({ order, onUpdateStatus }) {
 
   const handleStatusClick = async (manualEstimate = null) => {
     setIsUpdating(true);
-    const nextStatus = order.status === 'PLACED' ? 'IN_KITCHEN' : 'READY';
+    let nextStatus;
+    if (order.status === 'PLACED') nextStatus = 'IN_KITCHEN';
+    else if (order.status === 'IN_KITCHEN') nextStatus = 'READY';
+    else nextStatus = 'SERVED';
     
     if (order.status === 'PLACED' && !showEstimates && manualEstimate === null) {
       setShowEstimates(true);
@@ -160,8 +163,8 @@ export default function KitchenTicket({ order, onUpdateStatus }) {
             </Button>
 
             <Button
-              variant={order.status === 'PLACED' ? 'primary' : 'success'}
-              className="flex-1 shadow-md"
+              variant={order.status === 'PLACED' ? 'primary' : order.status === 'IN_KITCHEN' ? 'success' : 'outline'}
+              className={`flex-1 shadow-md ${order.status === 'READY' ? 'border-green-500 text-green-600 hover:bg-green-50' : ''}`}
               onClick={() => handleStatusClick()}
               loading={isUpdating}
             >
@@ -170,10 +173,15 @@ export default function KitchenTicket({ order, onUpdateStatus }) {
                   <Flame className="w-4 h-4 mr-2" />
                   {showEstimates ? 'Starting...' : 'Start'}
                 </>
-              ) : (
+              ) : order.status === 'IN_KITCHEN' ? (
                 <>
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Ready
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                  Serve Now
                 </>
               )}
             </Button>

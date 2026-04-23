@@ -23,7 +23,7 @@ public class KitchenService {
     @Transactional(readOnly = true)
     public List<OrderResponse> getActiveOrders() {
         return orderRepository.findByStatusInOrderByCreatedAtAsc(
-                Arrays.asList(OrderStatus.PLACED, OrderStatus.IN_KITCHEN)
+                Arrays.asList(OrderStatus.PLACED, OrderStatus.IN_KITCHEN, OrderStatus.READY)
         ).stream()
         .map(this::mapToResponse)
         .collect(Collectors.toList());

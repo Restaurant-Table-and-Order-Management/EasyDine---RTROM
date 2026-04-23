@@ -413,11 +413,14 @@ const useDataStore = create((set, get) => ({
     }
   },
 
-  fetchMyOrders: async () => {
-    set({ myOrdersLoading: true });
+  fetchMyOrders: async (silent = false) => {
+    if (!silent) set({ myOrdersLoading: true });
     try {
       const response = await api.get('/orders/my');
-      set({ myOrders: Array.isArray(response) ? response : (response.data || []), myOrdersLoading: false });
+      set({ 
+        myOrders: Array.isArray(response) ? response : (response.data || []), 
+        myOrdersLoading: false 
+      });
     } catch (error) {
       set({ myOrdersLoading: false });
     }

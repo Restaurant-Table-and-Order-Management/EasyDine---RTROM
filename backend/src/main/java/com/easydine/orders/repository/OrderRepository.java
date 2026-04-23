@@ -25,7 +25,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"orderItems", "user", "table", "orderItems.menuItem"})
     List<Order> findWithItemsByUserIdOrderByCreatedAtDesc(Long userId);
 
-    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status <> com.easydine.orders.entity.OrderStatus.CANCELLED AND o.createdAt >= :since")
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status != 'CANCELLED' AND o.createdAt >= :since")
     BigDecimal sumTotalAmountSince(@Param("since") LocalDateTime since);
 
     List<Order> findAllByCreatedAtAfter(LocalDateTime since);

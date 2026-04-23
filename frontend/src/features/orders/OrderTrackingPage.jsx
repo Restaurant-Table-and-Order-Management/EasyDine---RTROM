@@ -59,8 +59,8 @@ export default function OrderTrackingPage() {
 
   useEffect(() => {
     fetchSessionData();
-    // Poll for status updates every 15 seconds
-    const interval = setInterval(fetchSessionData, 15000);
+    // Poll for status updates every 8 seconds for a livelier feel
+    const interval = setInterval(fetchSessionData, 8000);
     return () => clearInterval(interval);
   }, [reservationId]);
 
