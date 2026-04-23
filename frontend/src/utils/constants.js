@@ -16,7 +16,9 @@ export const RESERVATION_STATUSES = {
 export const ORDER_STATUSES = {
   PENDING: 'PENDING',
   PLACED: 'PLACED',
-  IN_KITCHEN: 'IN_KITCHEN',
+  PREPARING: 'PREPARING',
+  COOKING: 'COOKING',
+  PLATING: 'PLATING',
   READY: 'READY',
   SERVED: 'SERVED',
   CANCELLED: 'CANCELLED',
@@ -52,7 +54,9 @@ export const STATUS_COLORS = {
   // Order specific
   PENDING: 'bg-gray-100 text-gray-500 border-gray-200',
   PLACED: 'bg-blue-500/10 text-blue-600 border-blue-200',
-  IN_KITCHEN: 'bg-brand-orange/10 text-brand-orange border-brand-orange/20',
+  PREPARING: 'bg-brand-orange/10 text-brand-orange border-brand-orange/20',
+  COOKING: 'bg-orange-500/10 text-orange-600 border-orange-200',
+  PLATING: 'bg-pink-500/10 text-pink-600 border-pink-200',
   READY: 'bg-green-500/10 text-green-600 border-green-200',
   SERVED: 'bg-gray-100 text-gray-500 border-gray-200',
 };
@@ -66,7 +70,9 @@ export const STATUS_DOT_COLORS = {
   CONFIRMED: 'bg-status-confirmed',
   CANCELLED: 'bg-status-cancelled',
   PLACED: 'bg-blue-500',
-  IN_KITCHEN: 'bg-brand-orange',
+  PREPARING: 'bg-brand-orange',
+  COOKING: 'bg-orange-500',
+  PLATING: 'bg-pink-500',
   READY: 'bg-green-500',
   SERVED: 'bg-gray-400',
 };
@@ -86,6 +92,7 @@ export const NAV_ITEMS = {
     { label: 'Table Management', path: '/admin/tables', icon: 'Utensils' },
     { label: 'Menu Management', path: '/admin/menu', icon: 'ClipboardList' },
     { label: 'Reservations', path: '/admin/reservations', icon: 'CalendarCheck' },
+    { label: 'User Management', path: '/admin/users', icon: 'Users' },
   ],
   STAFF: [
     { label: 'Dashboard', path: '/staff/dashboard', icon: 'LayoutDashboard' },
@@ -96,7 +103,7 @@ export const NAV_ITEMS = {
   ],
   KITCHEN_STAFF: [
     { label: 'Kitchen Hub', path: '/staff/dashboard', icon: 'LayoutDashboard' },
-    { label: 'Live Orders', path: '/kitchen/orders', icon: 'ClipboardList' },
+    { label: 'Past Serves', path: '/kitchen/history', icon: 'History' },
   ],
   CUSTOMER: [
     { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },

@@ -3,7 +3,9 @@ package com.easydine.orders.entity;
 public enum OrderStatus {
     PENDING,
     PLACED,
-    IN_KITCHEN,
+    PREPARING,
+    COOKING,
+    PLATING,
     READY,
     SERVED,
     CANCELLED

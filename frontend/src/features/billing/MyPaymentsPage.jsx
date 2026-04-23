@@ -41,7 +41,7 @@ export default function MyPaymentsPage() {
   const handlePayNow = async (reservationId) => {
     setPayingId(reservationId);
     try {
-        const res = await confirmPayment(reservationId);
+        const res = await confirmPayment(reservationId, 'CASH');
         if (res.success) {
             toast.success('Payment successful! Your table session is now settled.');
             fetchMyReservations();

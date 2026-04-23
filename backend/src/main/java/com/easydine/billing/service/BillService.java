@@ -8,6 +8,7 @@ import com.easydine.orders.entity.Order;
 import com.easydine.orders.entity.OrderItem;
 import com.easydine.orders.repository.OrderRepository;
 import com.easydine.reservation.entity.Reservation;
+import com.easydine.reservation.model.ReservationStatus;
 import com.easydine.reservation.repository.ReservationRepository;
 import com.easydine.table.model.TableStatus;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class BillService {
 
     private final OrderRepository orderRepository;
     private final ReservationRepository reservationRepository;
+    private final com.easydine.billing.repository.BillRepository billRepository;
     
     private static final BigDecimal TAX_RATE = new BigDecimal("0.05");
     private static final BigDecimal ONE_PLUS_TAX = BigDecimal.ONE.add(TAX_RATE);
@@ -88,20 +90,33 @@ public class BillService {
                 .build();
     }
 
-    public void confirmPayment(Long reservationId) {
+    public void confirmPayment(Long reservationId, String paymentMethod) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
         
         // Final bill calculation for persistence
         BillResponse finalBill = generateBill(reservationId);
         reservation.setTotalPaid(finalBill.getGrandTotal());
-        reservation.setStatus(com.easydine.reservation.model.ReservationStatus.COMPLETED);
+        reservation.setStatus(ReservationStatus.COMPLETED);
         
         if (reservation.getTable() != null) {
             reservation.getTable().setStatus(TableStatus.AVAILABLE);
         }
         
         reservationRepository.save(reservation);
+
+        // Save permanent bill record
+        com.easydine.billing.entity.Bill bill = com.easydine.billing.entity.Bill.builder()
+                .billNumber("ED-BILL-" + System.currentTimeMillis())
+                .reservation(reservation)
+                .subtotal(finalBill.getSubtotal())
+                .taxAmount(finalBill.getTaxAmount())
+                .discountAmount(finalBill.getDiscountAmount())
+                .grandTotal(finalBill.getGrandTotal())
+                .paymentMethod(paymentMethod != null ? paymentMethod : "UNKNOWN")
+                .build();
+        
+        billRepository.save(bill);
     }
 
     public RevenueReportResponse getRevenueReport() {
@@ -115,7 +130,7 @@ public class BillService {
         
         // 2. Settled Revenue (Actually paid via COMPLETED reservations + Direct Orders which are PAID by default)
         BigDecimal settledFromReservations = reservationRepository.findByReservationDateOrderByCreatedAtDesc(today).stream()
-                .filter(r -> r.getStatus() == com.easydine.reservation.model.ReservationStatus.COMPLETED)
+                .filter(r -> r.getStatus() == ReservationStatus.COMPLETED)
                 .map(r -> r.getTotalPaid() != null ? r.getTotalPaid() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -181,8 +196,8 @@ public class BillService {
                             .tableNumber(r.getTable().getTableNumber())
                             .grandTotal(amount)
                             .discountAmount(BigDecimal.ZERO) 
-                            .taxAmount(amount.subtract(amount.divide(ONE_PLUS_TAX, 2, java.math.RoundingMode.HALF_UP)))
-                            .subtotal(amount.divide(ONE_PLUS_TAX, 2, java.math.RoundingMode.HALF_UP))
+                            .taxAmount(amount.subtract(amount.divide(ONE_PLUS_TAX, 2, RoundingMode.HALF_UP)))
+                            .subtotal(amount.divide(ONE_PLUS_TAX, 2, RoundingMode.HALF_UP))
                             .build();
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -217,11 +232,11 @@ public class BillService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bill not found"));
         
-        if (reservation.getStatus() != com.easydine.reservation.model.ReservationStatus.COMPLETED) {
+        if (reservation.getStatus() != ReservationStatus.COMPLETED) {
             throw new IllegalStateException("Only completed bills can be refunded");
         }
         
-        reservation.setStatus(com.easydine.reservation.model.ReservationStatus.REFUNDED);
+        reservation.setStatus(ReservationStatus.REFUNDED);
         reservationRepository.save(reservation);
     }
 }

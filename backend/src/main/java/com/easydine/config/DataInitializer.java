@@ -13,6 +13,8 @@ import com.easydine.orders.repository.OrderRepository;
 import com.easydine.orders.entity.Order;
 import com.easydine.orders.entity.OrderItem;
 import com.easydine.orders.entity.OrderStatus;
+import com.easydine.kitchen.entity.KitchenOrder;
+import com.easydine.kitchen.repository.KitchenOrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -32,6 +34,7 @@ public class DataInitializer implements CommandLineRunner {
     private final RestaurantTableRepository tableRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final KitchenOrderRepository kitchenOrderRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -315,7 +318,7 @@ public class DataInitializer implements CommandLineRunner {
         Order order2 = Order.builder()
                 .user(customer)
                 .table(tables.get(2))
-                .status(OrderStatus.IN_KITCHEN)
+                .status(OrderStatus.PREPARING)
                 .orderNumber("ORD-SEED-102")
                 .orderDate(java.time.LocalDateTime.now())
                 .totalAmount(BigDecimal.valueOf(18.50))
@@ -330,7 +333,23 @@ public class DataInitializer implements CommandLineRunner {
         
         order2.setOrderItems(List.of(item2));
 
-        orderRepository.saveAll(List.of(order1, order2));
+        List<Order> savedOrders = orderRepository.saveAll(List.of(order1, order2));
+        
+        // Seed KitchenOrders for these
+        KitchenOrder ko1 = KitchenOrder.builder()
+                .order(savedOrders.get(0))
+                .status(OrderStatus.PLACED)
+                .receivedAt(java.time.LocalDateTime.now())
+                .build();
+        
+        KitchenOrder ko2 = KitchenOrder.builder()
+                .order(savedOrders.get(1))
+                .status(OrderStatus.PREPARING)
+                .receivedAt(java.time.LocalDateTime.now().minusMinutes(5))
+                .startedAt(java.time.LocalDateTime.now())
+                .build();
+        
+        kitchenOrderRepository.saveAll(List.of(ko1, ko2));
         
         // Mark these tables as OCCUPIED in the demo data
         tables.get(0).setStatus(TableStatus.OCCUPIED);

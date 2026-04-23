@@ -21,6 +21,11 @@ public class KitchenController {
         return ResponseEntity.ok(kitchenService.getActiveOrders());
     }
 
+    @GetMapping("/orders/history")
+    public ResponseEntity<List<OrderResponse>> getPastOrders() {
+        return ResponseEntity.ok(kitchenService.getPastOrders());
+    }
+
     @PatchMapping("/orders/{id}/status")
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @PathVariable Long id,

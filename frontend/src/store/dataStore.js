@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '../api/axiosConfig';
+import webSocketService from '../services/websocket';
 
 const useDataStore = create((set, get) => ({
   // Tables state
@@ -18,6 +19,7 @@ const useDataStore = create((set, get) => ({
   // Kitchen / Orders state
   activeOrders: [],
   readyOrders: [],
+  pastOrders: [],
   myOrders: [],
   myOrdersLoading: false,
   ordersLoading: false,
@@ -31,6 +33,8 @@ const useDataStore = create((set, get) => ({
   searchResults: [],
   searchLoading: false,
   hasSearched: false,
+  allUsers: [],
+  usersLoading: false,
 
   // Right panel state
   rightPanelContent: null, // 'booking' | 'details' | null
@@ -155,9 +159,9 @@ const useDataStore = create((set, get) => ({
     }
   },
 
-  confirmPayment: async (reservationId) => {
+  confirmPayment: async (reservationId, paymentMethod) => {
     try {
-      await api.post(`/billing/confirm/${reservationId}`);
+      await api.post(`/billing/confirm/${reservationId}`, null, { params: { paymentMethod } });
       return { success: true };
     } catch (error) {
       return { success: false, message: 'Payment confirmation failed' };
@@ -352,6 +356,25 @@ const useDataStore = create((set, get) => ({
     }
   },
 
+  initKitchenWebSocket: () => {
+    webSocketService.connect();
+    webSocketService.subscribe('/topic/kitchen/orders', (orders) => {
+        set({ activeOrders: orders, ordersLoading: false });
+    });
+  },
+
+  fetchPastOrders: async () => {
+    set({ ordersLoading: true });
+    try {
+      const response = await api.get('/kitchen/orders/history');
+      set({ pastOrders: Array.isArray(response) ? response : (response.data || []), ordersLoading: false });
+      return { success: true };
+    } catch (error) {
+      set({ ordersLoading: false });
+      return { success: false };
+    }
+  },
+
   fetchReadyOrders: async () => {
     set({ ordersLoading: true });
     try {
@@ -413,11 +436,14 @@ const useDataStore = create((set, get) => ({
     }
   },
 
-  fetchMyOrders: async () => {
-    set({ myOrdersLoading: true });
+  fetchMyOrders: async (silent = false) => {
+    if (!silent) set({ myOrdersLoading: true });
     try {
       const response = await api.get('/orders/my');
-      set({ myOrders: Array.isArray(response) ? response : (response.data || []), myOrdersLoading: false });
+      set({ 
+        myOrders: Array.isArray(response) ? response : (response.data || []), 
+        myOrdersLoading: false 
+      });
     } catch (error) {
       set({ myOrdersLoading: false });
     }
@@ -436,6 +462,44 @@ const useDataStore = create((set, get) => ({
     set((state) => ({
       notifications: state.notifications.map(n => ({ ...n, read: true }))
     }));
+  },
+
+  // ===================== ADMIN: USER MANAGEMENT =====================
+  fetchUsers: async () => {
+    set({ usersLoading: true });
+    try {
+      const response = await api.get('/admin/users');
+      set({ allUsers: Array.isArray(response) ? response : (response.data || []), usersLoading: false });
+    } catch (error) {
+      set({ usersLoading: false });
+    }
+  },
+
+  updateUserRole: async (userId, role) => {
+    try {
+      const response = await api.patch(`/admin/users/${userId}/role`, null, {
+        params: { role }
+      });
+      const updatedUser = response.data || response;
+      set((state) => ({
+        allUsers: state.allUsers.map(u => u.id === userId ? updatedUser : u)
+      }));
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Failed to update role' };
+    }
+  },
+
+  deleteUser: async (userId) => {
+    try {
+      await api.delete(`/admin/users/${userId}`);
+      set((state) => ({
+        allUsers: state.allUsers.filter(u => u.id !== userId)
+      }));
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Failed to delete user' };
+    }
   }
 }));
 

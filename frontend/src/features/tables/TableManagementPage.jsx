@@ -241,7 +241,7 @@ export default function TableManagementPage() {
                              <Layers className="w-3 h-3" /> Floor {table.floorNumber || 1}
                          </span>
                          <span className="px-2.5 py-1 rounded-md bg-white/90 dark:bg-black/70 backdrop-blur-md text-[10px] font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                             <User className="w-3 h-3" /> {table.capacity} Pax
+                             <User className="w-3 h-3" /> {table.capacity} Guests
                          </span>
                       </div>
                       
@@ -390,21 +390,21 @@ export default function TableManagementPage() {
                       
                       <div className="space-y-3 hidden sm:block"> {/* Bar chart mock */}
                           <div className="flex items-center gap-3">
-                              <span className="text-xs text-gray-500 w-8">2 Pax</span>
+                              <span className="text-xs text-gray-500 w-8">2 Guests</span>
                               <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
                                   <div className="bg-blue-400 h-full w-[40%] rounded-full"></div>
                               </div>
                               <span className="text-xs font-medium w-4 text-right">40%</span>
                           </div>
                           <div className="flex items-center gap-3">
-                              <span className="text-xs text-gray-500 w-8">4 Pax</span>
+                              <span className="text-xs text-gray-500 w-8">4 Guests</span>
                               <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
                                   <div className="bg-brand-orange h-full w-[35%] rounded-full"></div>
                               </div>
                               <span className="text-xs font-medium w-4 text-right">35%</span>
                           </div>
                           <div className="flex items-center gap-3">
-                              <span className="text-xs text-gray-500 w-8">6+ Pax</span>
+                              <span className="text-xs text-gray-500 w-8">6+ Guests</span>
                               <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
                                   <div className="bg-green-400 h-full w-[25%] rounded-full"></div>
                               </div>
