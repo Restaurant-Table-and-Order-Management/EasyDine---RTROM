@@ -75,7 +75,7 @@ export default function SignupPage() {
 
     if (result.success) {
       toast.success(`Welcome, ${result.user.name}! Account created.`);
-      navigate(getRoleRedirect());
+      navigate(getRoleRedirect(), { replace: true });
     } else {
       toast.error(result.message);
     }
@@ -84,35 +84,52 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left side — decorative */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-orange-900 via-brand-orange-dark to-brand-orange items-center justify-center p-12">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="relative z-10 text-center max-w-md">
-          <div className="w-20 h-20 mx-auto mb-8 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-            <ChefHat className="w-10 h-10 text-white" />
-          </div>
-          <h2 className="text-4xl font-bold text-white mb-4">
-            Join EasyDine Today
-          </h2>
-          <p className="text-white/80 text-lg leading-relaxed">
-            Create your account and start managing reservations in minutes. No credit card required.
-          </p>
-          <div className="mt-10 grid grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
-              <p className="text-2xl mb-1">⚡</p>
-              <p className="text-sm text-white/80">Quick Setup</p>
-            </div>
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
-              <p className="text-2xl mb-1">🔒</p>
-              <p className="text-sm text-white/80">Secure</p>
-            </div>
-            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
-              <p className="text-2xl mb-1">📱</p>
-              <p className="text-sm text-white/80">Mobile Ready</p>
+      <div className="hidden lg:flex w-1/2 relative p-12 flex-col justify-center overflow-hidden bg-black">
+        {/* Full-bleed background image with a dark vignette */}
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center opacity-60"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+
+        {/* Floating Mockup UI */}
+        <div className="absolute top-[12%] right-[8%] bg-black/40 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-2xl animate-float opacity-90 rotate-2 z-20">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-bold">✓</div>
+            <div>
+              <p className="text-xs font-bold text-white">Table 4 Ready</p>
+              <p className="text-[10px] text-white/50">Kitchen synchronized</p>
             </div>
           </div>
         </div>
-        <div className="absolute top-20 right-20 w-40 h-40 rounded-full bg-white/5 blur-xl" />
-        <div className="absolute bottom-20 left-20 w-60 h-60 rounded-full bg-white/5 blur-xl" />
+        
+        <div className="absolute bottom-[8%] left-[8%] bg-black/40 backdrop-blur-md border border-white/10 p-5 rounded-2xl shadow-2xl animate-float-delayed opacity-90 -rotate-3 z-20">
+           <div className="flex justify-between items-end gap-8">
+              <div>
+                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Live Revenue</p>
+                 <p className="text-2xl font-black text-white">₹42,850</p>
+              </div>
+              <div className="w-12 h-10 flex items-end gap-1.5">
+                 <div className="w-full bg-brand-orange/60 h-1/2 rounded-t-sm"></div>
+                 <div className="w-full bg-brand-orange/80 h-3/4 rounded-t-sm"></div>
+                 <div className="w-full bg-brand-orange h-full rounded-t-sm"></div>
+              </div>
+           </div>
+        </div>
+
+        <div className="relative z-10 max-w-md mx-auto text-center text-white -mt-10">
+          <div className="w-20 h-20 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mx-auto mb-8 shadow-2xl hover:scale-105 transition-transform">
+            <ChefHat className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-4xl font-extrabold mb-6 tracking-tight">Join EasyDine Today</h2>
+          
+          <div className="pt-8 mt-8 border-t border-white/10 relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-transparent px-4">
+               <div className="w-1.5 h-1.5 rounded-full bg-white/30"></div>
+            </div>
+            <p className="text-lg font-medium text-white/80 leading-relaxed italic">
+              "A comprehensive ecosystem for modern restaurant management, integrating front-of-house service with back-of-house efficiency."
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Right side — form */}
@@ -165,36 +182,7 @@ export default function SignupPage() {
               icon={Mail}
             />
 
-            {/* Role Selection */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Register as
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {[
-                  { id: USER_ROLES.CUSTOMER, label: 'Customer', icon: User },
-                  { id: USER_ROLES.KITCHEN_STAFF, label: 'Kitchen', icon: ChefHat },
-                  { id: USER_ROLES.ADMIN, label: 'Admin', icon: ShieldCheck },
-                ].map((role) => {
-                  const Icon = role.icon;
-                  const isSelected = formData.role === role.id;
-                  return (
-                    <button
-                      key={role.id}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, role: role.id }))}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all group ${isSelected
-                          ? 'border-brand-orange bg-brand-orange/5 text-brand-orange shadow-sm'
-                          : 'border-gray-100 dark:border-gray-800 hover:border-brand-orange/30 text-gray-500 dark:text-gray-400'
-                        }`}
-                    >
-                      <Icon className={`w-5 h-5 mb-1.5 transition-transform group-hover:scale-110 ${isSelected ? 'text-brand-orange' : ''}`} />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">{role.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Role Selection removed, role is fixed to CUSTOMER */}
 
             <Input
               label="Password"
@@ -258,6 +246,7 @@ export default function SignupPage() {
             Already have an account?{' '}
             <Link
               to="/login"
+              replace
               className="font-semibold text-brand-orange hover:text-brand-orange-dark dark:text-brand-gold dark:hover:text-brand-gold-light transition-colors"
             >
               Sign in

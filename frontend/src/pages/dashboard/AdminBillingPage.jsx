@@ -105,7 +105,7 @@ export default function AdminBillingPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <button 
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin/dashboard')}
             className="p-3 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 hover:scale-105 transition-all text-gray-400 shadow-sm"
           >
             <ArrowLeft className="w-5 h-5" />
