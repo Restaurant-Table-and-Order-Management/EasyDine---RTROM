@@ -92,6 +92,7 @@ export const NAV_ITEMS = {
     { label: 'Table Management', path: '/admin/tables', icon: 'Utensils' },
     { label: 'Menu Management', path: '/admin/menu', icon: 'ClipboardList' },
     { label: 'Reservations', path: '/admin/reservations', icon: 'CalendarCheck' },
+    { label: 'User Management', path: '/admin/users', icon: 'Users' },
   ],
   STAFF: [
     { label: 'Dashboard', path: '/staff/dashboard', icon: 'LayoutDashboard' },
@@ -102,7 +103,7 @@ export const NAV_ITEMS = {
   ],
   KITCHEN_STAFF: [
     { label: 'Kitchen Hub', path: '/staff/dashboard', icon: 'LayoutDashboard' },
-    { label: 'Live Orders', path: '/kitchen/orders', icon: 'ClipboardList' },
+    { label: 'Past Serves', path: '/kitchen/history', icon: 'History' },
   ],
   CUSTOMER: [
     { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },

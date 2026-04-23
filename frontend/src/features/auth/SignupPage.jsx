@@ -165,36 +165,6 @@ export default function SignupPage() {
               icon={Mail}
             />
 
-            {/* Role Selection */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Register as
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {[
-                  { id: USER_ROLES.CUSTOMER, label: 'Customer', icon: User },
-                  { id: USER_ROLES.KITCHEN_STAFF, label: 'Kitchen', icon: ChefHat },
-                  { id: USER_ROLES.ADMIN, label: 'Admin', icon: ShieldCheck },
-                ].map((role) => {
-                  const Icon = role.icon;
-                  const isSelected = formData.role === role.id;
-                  return (
-                    <button
-                      key={role.id}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, role: role.id }))}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all group ${isSelected
-                          ? 'border-brand-orange bg-brand-orange/5 text-brand-orange shadow-sm'
-                          : 'border-gray-100 dark:border-gray-800 hover:border-brand-orange/30 text-gray-500 dark:text-gray-400'
-                        }`}
-                    >
-                      <Icon className={`w-5 h-5 mb-1.5 transition-transform group-hover:scale-110 ${isSelected ? 'text-brand-orange' : ''}`} />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">{role.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
 
             <Input
               label="Password"

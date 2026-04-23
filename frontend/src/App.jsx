@@ -30,6 +30,8 @@ import CustomerMenuPage from './features/orders/CustomerMenuPage';
 import OrderTrackingPage from './features/orders/OrderTrackingPage';
 import MyOrdersPage from './features/orders/MyOrdersPage';
 import MyPaymentsPage from './features/billing/MyPaymentsPage';
+import PastOrdersPage from './pages/dashboard/PastOrdersPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
 
 // Guards
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -141,6 +143,14 @@ function App() {
               }
             />
             <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="ADMIN">
+                  <UserManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/menu"
               element={
                 <ProtectedRoute requireAuth={true} requiredRole="ADMIN">
@@ -162,6 +172,14 @@ function App() {
               element={
                 <ProtectedRoute requireAuth={true} requiredRole="KITCHEN_STAFF">
                   <KitchenDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/kitchen/history"
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="KITCHEN_STAFF">
+                  <PastOrdersPage />
                 </ProtectedRoute>
               }
             />

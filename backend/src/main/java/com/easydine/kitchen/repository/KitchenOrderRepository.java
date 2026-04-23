@@ -10,6 +10,12 @@ import java.util.Optional;
 
 @Repository
 public interface KitchenOrderRepository extends JpaRepository<KitchenOrder, Long> {
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"order", "order.orderItems", "order.user"})
     List<KitchenOrder> findByStatusInOrderByReceivedAtAsc(List<OrderStatus> statuses);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"order", "order.orderItems", "order.user"})
+    List<KitchenOrder> findByStatusInOrderByReceivedAtDesc(List<OrderStatus> statuses);
+    
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"order", "order.orderItems", "order.user"})
     Optional<KitchenOrder> findByOrderId(Long orderId);
 }

@@ -15,7 +15,8 @@ import {
   Bell,
   CheckCircle2,
   Clock,
-  Wallet
+  Wallet,
+  History
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useDataStore from '../../store/dataStore';
@@ -36,6 +37,7 @@ const iconMap = {
   Users,
   ShoppingBag,
   Wallet,
+  History,
 };
 
 export default function DashboardLayout() {

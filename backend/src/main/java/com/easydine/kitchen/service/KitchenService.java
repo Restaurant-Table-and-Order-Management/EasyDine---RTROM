@@ -38,6 +38,15 @@ public class KitchenService {
         .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getPastOrders() {
+        return kitchenOrderRepository.findByStatusInOrderByReceivedAtDesc(
+                Arrays.asList(OrderStatus.SERVED, OrderStatus.CANCELLED)
+        ).stream()
+        .map(ko -> mapToResponse(ko.getOrder(), ko))
+        .collect(Collectors.toList());
+    }
+
     @Transactional
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus) {
         KitchenOrder ko = kitchenOrderRepository.findByOrderId(orderId)
@@ -69,7 +78,9 @@ public class KitchenService {
     }
 
     private OrderResponse mapToResponse(Order order, KitchenOrder kitchenOrder) {
-        List<OrderItemResponse> items = order.getOrderItems().stream()
+        if (order == null) return null;
+        
+        List<OrderItemResponse> items = order.getOrderItems() != null ? order.getOrderItems().stream()
                 .map(item -> OrderItemResponse.builder()
                         .id(item.getId())
                         .menuItemId(item.getMenuItem().getId())
@@ -78,11 +89,11 @@ public class KitchenService {
                         .price(item.getPriceAtTimeOfOrder())
                         .specialInstructions(item.getSpecialInstructions())
                         .build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : java.util.Collections.emptyList();
 
         return OrderResponse.builder()
                 .id(order.getId())
-                .customerName(order.getUser().getName())
+                .customerName(order.getUser() != null ? order.getUser().getName() : "Guest")
                 .reservationId(order.getReservation() != null ? order.getReservation().getId() : null)
                 .tableId(order.getTable() != null ? order.getTable().getId() : null)
                 .tableNumber(order.getTable() != null ? order.getTable().getTableNumber() : null)
