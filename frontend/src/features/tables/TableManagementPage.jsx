@@ -8,11 +8,13 @@ import CreateTableModal from './CreateTableModal';
 import Card from '../../components/ui/Card';
 import { TABLE_STATUSES, TABLE_IMAGES, TABLE_LOCATIONS, STATUS_DOT_COLORS } from '../../utils/constants';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 export default function TableManagementPage() {
   const { tables, tablesLoading, fetchTables, updateTableStatus, deleteTable } = useDataStore();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [statusMenuOpen, setStatusMenuOpen] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null });
   
   // View states
   const [viewMode, setViewMode] = useState('grid'); // grid, list, map
@@ -39,15 +41,22 @@ export default function TableManagementPage() {
     }
   };
 
-  const handleDeleteTable = async (tableId) => {
-    if (!window.confirm("Are you sure you want to delete this table?")) return;
+  const handleDeleteTableClick = (tableId) => {
+    setDeleteModal({ isOpen: true, id: tableId });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { id } = deleteModal;
+    if (!id) return;
+    
     const loadingToast = toast.loading('Deleting table...');
-    const result = await deleteTable(tableId);
+    const result = await deleteTable(id);
     if (result.success) {
       toast.success('Table deleted successfully', { id: loadingToast });
     } else {
       toast.error(result.message, { id: loadingToast });
     }
+    setDeleteModal({ isOpen: false, id: null });
   };
   const statusOptions = Object.values(TABLE_STATUSES);
 
@@ -288,7 +297,7 @@ export default function TableManagementPage() {
                           <span className="text-xs text-gray-500 font-medium">Quick Actions</span>
                           <div className="flex gap-2">
                              <button className="p-1.5 text-gray-400 hover:text-brand-orange transition-colors"><Edit2 className="w-4 h-4" /></button>
-                             <button onClick={() => handleDeleteTable(table.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                             <button onClick={() => handleDeleteTableClick(table.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                           </div>
                       </div>
                       
@@ -326,7 +335,7 @@ export default function TableManagementPage() {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <button className="p-1.5 text-gray-400 hover:text-brand-orange transition-colors" title="Edit"><Edit2 className="w-4 h-4" /></button>
-                                             <button onClick={() => handleDeleteTable(table.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                                             <button onClick={() => handleDeleteTableClick(table.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -410,6 +419,16 @@ export default function TableManagementPage() {
       <CreateTableModal
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
+      />
+
+      <ConfirmModal 
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        onConfirm={handleConfirmDelete}
+        title="Remove Table"
+        message="Are you sure you want to delete this table? This will remove all its configuration and it will no longer be available for bookings."
+        confirmText="Yes, Remove"
+        variant="danger"
       />
     </div>
   );

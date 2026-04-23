@@ -4,6 +4,8 @@ import useDataStore from '../../store/dataStore';
 import ReservationCard from './ReservationCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../../components/common/ConfirmModal';
+import { useState } from 'react';
 
 export default function MyReservationsPage() {
   const {
@@ -13,17 +15,28 @@ export default function MyReservationsPage() {
     cancelReservation,
   } = useDataStore();
 
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
+
   useEffect(() => {
     fetchMyReservations();
   }, [fetchMyReservations]);
 
-  const handleCancel = async (id) => {
+  const handleCancelClick = (id) => {
+    setConfirmModal({ isOpen: true, id });
+  };
+
+  const handleCancelConfirm = async () => {
+    const { id } = confirmModal;
+    if (!id) return;
+
+    const loadingId = toast.loading('Cancelling your reservation...');
     const result = await cancelReservation(id);
     if (result.success) {
-      toast.success('Reservation cancelled successfully');
+      toast.success('Reservation cancelled successfully', { id: loadingId });
     } else {
-      toast.error(result.message);
+      toast.error(result.message, { id: loadingId });
     }
+    setConfirmModal({ isOpen: false, id: null });
   };
 
   // Sort by date descending (upcoming first)
@@ -66,11 +79,21 @@ export default function MyReservationsPage() {
             <ReservationCard
               key={reservation.id}
               reservation={reservation}
-              onCancel={handleCancel}
+              onCancel={handleCancelClick}
             />
           ))}
         </div>
       )}
+
+      <ConfirmModal 
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={handleCancelConfirm}
+        title="Cancel My Booking"
+        message="Are you sure you want to cancel your table? This will free it up for other guests."
+        confirmText="Yes, Cancel"
+        variant="danger"
+      />
     </div>
   );
 }

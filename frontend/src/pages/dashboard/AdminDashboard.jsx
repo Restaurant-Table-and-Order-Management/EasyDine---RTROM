@@ -14,6 +14,7 @@ import {
   Wallet,
   Receipt,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import useDataStore from '../../store/dataStore';
@@ -39,6 +40,39 @@ export default function AdminDashboard() {
   
   const [revenueData, setRevenueData] = useState(null);
   const navigate = useNavigate();
+
+  const handleExportCSV = () => {
+    if (todaysReservations.length === 0) {
+      toast.error("No reservations to export for today");
+      return;
+    }
+
+    const headers = ['ID', 'Customer', 'Table', 'Guests', 'Time', 'Status'];
+    const csvRows = [headers.join(',')];
+    
+    todaysReservations.forEach(r => {
+      const row = [
+        r.id,
+        `"${r.userName || 'N/A'}"`,
+        `"${r.tableNumber || r.tableId}"`,
+        r.guestCount,
+        `"${r.startTime} - ${r.endTime}"`,
+        r.status
+      ];
+      csvRows.push(row.join(','));
+    });
+    
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', `EasyDine_Reservations_${todayStr}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.success("Report downloaded successfully");
+  };
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -459,7 +493,7 @@ export default function AdminDashboard() {
         <Card>
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Export Reports</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Generate daily summary for accounting and management.</p>
-            <Button variant="outline" fullWidth className="dark:border-gray-700">
+            <Button onClick={handleExportCSV} variant="outline" fullWidth className="dark:border-gray-700">
                 Download Today's CSV
             </Button>
         </Card>

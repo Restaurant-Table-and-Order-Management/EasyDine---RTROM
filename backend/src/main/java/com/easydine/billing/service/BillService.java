@@ -146,21 +146,58 @@ public class BillService {
 
     public List<BillResponse> getAllBillsByDate(String dateStr) {
         java.time.LocalDate date = java.time.LocalDate.parse(dateStr);
-        return reservationRepository.findByReservationDateOrderByCreatedAtDesc(date).stream()
-                .filter(r -> r.getTotalPaid() != null)
-                .map(r -> BillResponse.builder()
-                        .id(r.getId())
-                        .reservationId(r.getId())
-                        .customerName(r.getUser().getName())
-                        .tableNumber(r.getTable().getTableNumber())
-                        .grandTotal(r.getTotalPaid())
-                        .discountAmount(BigDecimal.ZERO) 
-                        .taxAmount(r.getTotalPaid().subtract(r.getTotalPaid().divide(ONE_PLUS_TAX, 2, java.math.RoundingMode.HALF_UP)))
-                        .subtotal(r.getTotalPaid().divide(ONE_PLUS_TAX, 2, java.math.RoundingMode.HALF_UP))
-                        // We'll reuse the discount field or add status to BillResponse if needed, 
-                        // but for now the Admin UI will handle status from the Reservation
-                        .build())
+        java.time.LocalDateTime startOfDay = date.atStartOfDay();
+        java.time.LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+
+        // 1. Get bills from reservations
+        List<BillResponse> bills = reservationRepository.findByReservationDateOrderByCreatedAtDesc(date).stream()
+                .filter(r -> r.getTotalPaid() != null || !orderRepository.findByReservationIdOrderByCreatedAtDesc(r.getId()).isEmpty())
+                .map(r -> {
+                    BigDecimal amount = r.getTotalPaid();
+                    if (amount == null) {
+                        try {
+                            amount = generateBill(r.getId()).getGrandTotal();
+                        } catch (Exception e) {
+                            amount = BigDecimal.ZERO;
+                        }
+                    }
+                    return BillResponse.builder()
+                            .id(r.getId())
+                            .reservationId(r.getId())
+                            .customerName(r.getUser().getName())
+                            .tableNumber(r.getTable().getTableNumber())
+                            .grandTotal(amount)
+                            .discountAmount(BigDecimal.ZERO) 
+                            .taxAmount(amount.subtract(amount.divide(ONE_PLUS_TAX, 2, java.math.RoundingMode.HALF_UP)))
+                            .subtotal(amount.divide(ONE_PLUS_TAX, 2, java.math.RoundingMode.HALF_UP))
+                            .build();
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        // 2. Add direct orders (no reservation) for that date
+        List<Order> directOrders = orderRepository.findAllByCreatedAtAfter(startOfDay).stream()
+                .filter(o -> o.getCreatedAt().isBefore(endOfDay))
+                .filter(o -> o.getReservation() == null)
                 .collect(Collectors.toList());
+
+        for (Order o : directOrders) {
+            BigDecimal subtotal = o.getTotalAmount();
+            BigDecimal tax = subtotal.multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal total = subtotal.add(tax);
+            
+            bills.add(BillResponse.builder()
+                    .id(o.getId() + 1000000L) // Virtual ID
+                    .reservationId(null)
+                    .customerName(o.getUser().getName() + " (Walk-in)")
+                    .tableNumber(o.getTable() != null ? o.getTable().getTableNumber() : "N/A")
+                    .grandTotal(total)
+                    .subtotal(subtotal)
+                    .taxAmount(tax)
+                    .discountAmount(BigDecimal.ZERO)
+                    .build());
+        }
+        
+        return bills;
     }
 
     public void processRefund(Long id) {

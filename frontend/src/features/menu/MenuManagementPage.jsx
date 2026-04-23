@@ -7,6 +7,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Card from '../../components/ui/Card';
 import toast from 'react-hot-toast';
 import MenuItemFormModal from './MenuItemFormModal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 const MENU_CATEGORIES = ['STARTERS', 'MAINS', 'DRINKS', 'DESSERTS'];
 
@@ -16,6 +17,7 @@ export default function MenuManagementPage() {
   const { menuItems, menuLoading, fetchMenuItems, updateMenuItem, deleteMenuItem } = useDataStore();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null });
   
   // View states
   const [viewMode, setViewMode] = useState('grid'); // grid, list
@@ -39,16 +41,22 @@ export default function MenuManagementPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this menu item?")) {
-      const loadingToast = toast.loading('Deleting item...');
-      const result = await deleteMenuItem(id);
-      if (result.success) {
-        toast.success(`Item deleted.`, { id: loadingToast });
-      } else {
-        toast.error(result.message, { id: loadingToast });
-      }
+  const handleDeleteClick = (id) => {
+    setDeleteModal({ isOpen: true, id });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { id } = deleteModal;
+    if (!id) return;
+    
+    const loadingId = toast.loading('Deleting menu item...');
+    const result = await deleteMenuItem(id);
+    if (result.success) {
+      toast.success('Menu item deleted', { id: loadingId });
+    } else {
+      toast.error(result.message, { id: loadingId });
     }
+    setDeleteModal({ isOpen: false, id: null });
   };
 
   const clearFilters = () => {
@@ -200,7 +208,7 @@ export default function MenuManagementPage() {
 
                           <div className="flex gap-1">
                              <button onClick={() => { setEditingItem(item); setCreateModalOpen(true); }} className="p-2 text-gray-400 hover:text-brand-orange hover:bg-brand-orange/10 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
-                             <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                             <button onClick={() => handleDeleteClick(item.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
                           </div>
                       </div>
                     </div>
@@ -249,7 +257,7 @@ export default function MenuManagementPage() {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <button onClick={() => { setEditingItem(item); setCreateModalOpen(true); }} className="p-1.5 text-gray-400 hover:text-brand-orange transition-colors" title="Edit"><Edit2 className="w-4 h-4" /></button>
-                                            <button onClick={() => handleDelete(item.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                                            <button onClick={() => handleDeleteClick(item.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -293,6 +301,16 @@ export default function MenuManagementPage() {
         isOpen={createModalOpen}
         onClose={() => { setCreateModalOpen(false); setEditingItem(null); }}
         editingItem={editingItem}
+      />
+
+      <ConfirmModal 
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        onConfirm={handleConfirmDelete}
+        title="Delete Menu Item"
+        message="Are you sure you want to remove this item from the menu? This action cannot be undone."
+        confirmText="Delete Item"
+        variant="danger"
       />
     </div>
   );

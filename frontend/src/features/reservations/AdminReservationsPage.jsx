@@ -8,6 +8,7 @@ import Card from '../../components/ui/Card';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { getTodayDate } from '../../utils/dateHelpers';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 export default function AdminReservationsPage() {
   const {
@@ -22,7 +23,9 @@ export default function AdminReservationsPage() {
   const [dateFilter, setDateFilter] = useState(''); // Default to all dates initially
   const [datePreset, setDatePreset] = useState('ALL'); // ALL, TODAY, TOMORROW
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [activeTab, setActiveTab] = useState('ACTIVE'); // ACTIVE, HISTORY
   const [searchQuery, setSearchQuery] = useState('');
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null });
 
   const loadReservations = useCallback(() => {
     fetchAllReservations(dateFilter, 'ALL'); // Always fetch ALL statuses, then filter locally for UI snappiness if possible, or fetch via API if preferred. Let's rely on API + local.
@@ -58,9 +61,13 @@ export default function AdminReservationsPage() {
     }
   };
 
-  const handleCancel = async (id) => {
-      // Small simulated confirmation dialog logic for realism
-      if(!window.confirm("Are you sure you want to cancel this reservation?")) return;
+   const handleCancelClick = (id) => {
+      setConfirmModal({ isOpen: true, id });
+  };
+
+  const handleCancelConfirm = async () => {
+      const { id } = confirmModal;
+      if (!id) return;
       
       const loadingId = toast.loading('Cancelling reservation...');
       const result = await cancelReservation(id);
@@ -69,6 +76,7 @@ export default function AdminReservationsPage() {
       } else {
         toast.error(result.message, { id: loadingId });
       }
+      setConfirmModal({ isOpen: false, id: null });
   };
   
   const handleCheckIn = async (id) => {
@@ -88,9 +96,17 @@ export default function AdminReservationsPage() {
     setSearchQuery('');
   };
 
-  // Local filtering (Search & Status)
+  // Local filtering (Search & Status & Tabs)
   const filteredReservations = reservations.filter(r => {
+      // Tab Filter
+      const isHistoryStatus = ['CANCELLED', 'COMPLETED', 'REFUNDED'].includes(r.status);
+      if (activeTab === 'ACTIVE' && isHistoryStatus) return false;
+      if (activeTab === 'HISTORY' && !isHistoryStatus) return false;
+
+      // Status Filter
       if (statusFilter !== 'ALL' && r.status !== statusFilter) return false;
+      
+      // Search Filter
       if (searchQuery) {
           const q = searchQuery.toLowerCase();
           const matchName = r.userName?.toLowerCase().includes(q);
@@ -100,9 +116,9 @@ export default function AdminReservationsPage() {
       return true;
   });
 
-  // Count stats
-  const pendingCount = filteredReservations.filter((r) => r.status === 'PENDING').length;
-  const confirmedCount = filteredReservations.filter((r) => r.status === 'CONFIRMED').length;
+  // Count stats (global, not filtered by tab)
+  const pendingCount = reservations.filter((r) => r.status === 'PENDING').length;
+  const confirmedCount = reservations.filter((r) => r.status === 'CONFIRMED').length;
 
   return (
     <div className="flex flex-col xl:flex-row gap-6 max-w-7xl mx-auto animate-fade-in">
@@ -186,13 +202,38 @@ export default function AdminReservationsPage() {
                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange"
                    >
                        <option value="ALL">All Statuses</option>
-                       <option value="PENDING">Pending</option>
-                       <option value="CONFIRMED">Confirmed</option>
-                       <option value="CANCELLED">Cancelled</option>
+                       {activeTab === 'ACTIVE' ? (
+                           <>
+                               <option value="PENDING">Pending</option>
+                               <option value="CONFIRMED">Confirmed</option>
+                           </>
+                       ) : (
+                           <>
+                               <option value="CANCELLED">Cancelled</option>
+                               <option value="COMPLETED">Completed</option>
+                               <option value="REFUNDED">Refunded</option>
+                           </>
+                       )}
                    </select>
                </div>
            </div>
         </Card>
+
+         {/* Tabs switcher */}
+         <div className="flex items-center gap-1 bg-gray-100/50 dark:bg-gray-800/30 p-1 rounded-2xl w-fit">
+            <button 
+                onClick={() => { setActiveTab('ACTIVE'); setStatusFilter('ALL'); }}
+                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'ACTIVE' ? 'bg-white dark:bg-surface-dark shadow-sm text-brand-orange' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            >
+                Active Bookings
+            </button>
+            <button 
+                onClick={() => { setActiveTab('HISTORY'); setStatusFilter('ALL'); }}
+                className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'HISTORY' ? 'bg-white dark:bg-surface-dark shadow-sm text-red-500' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            >
+                Cancelled & History
+            </button>
+         </div>
 
         {/* Results Stream */}
         {reservationsLoading ? (
@@ -222,7 +263,7 @@ export default function AdminReservationsPage() {
                 key={reservation.id}
                 reservation={reservation}
                 onConfirm={handleConfirm}
-                onCancel={handleCancel}
+                onCancel={handleCancelClick}
                 onCheckIn={handleCheckIn}
                 showCustomerName
                 isAdminView
@@ -322,8 +363,17 @@ export default function AdminReservationsPage() {
                  </div>
              </div>
           </Card>
-      </div>
+       </div>
 
+       <ConfirmModal 
+            isOpen={confirmModal.isOpen}
+            onClose={() => setConfirmModal({ isOpen: false, id: null })}
+            onConfirm={handleCancelConfirm}
+            title="Cancel Reservation"
+            message="Are you sure you want to cancel this reservation? This action cannot be undone and the customer will be notified."
+            confirmText="Yes, Cancel it"
+            variant="danger"
+       />
     </div>
   );
 }

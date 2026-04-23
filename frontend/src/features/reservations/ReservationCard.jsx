@@ -20,9 +20,7 @@ export default function ReservationCard({
   const canCheckIn = isAdminView && reservation.status === 'CONFIRMED';
 
   const handleCancel = () => {
-    if (window.confirm('Are you sure you want to cancel this reservation?')) {
-      onCancel && onCancel(reservation.id);
-    }
+    onCancel && onCancel(reservation.id);
   };
 
   return (
