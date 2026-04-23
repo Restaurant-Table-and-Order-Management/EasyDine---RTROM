@@ -16,6 +16,9 @@ import com.easydine.orders.entity.OrderStatus;
 import com.easydine.orders.repository.OrderRepository;
 import com.easydine.table.model.TableStatus;
 import com.easydine.table.repository.RestaurantTableRepository;
+import com.easydine.kitchen.entity.KitchenOrder;
+import com.easydine.kitchen.repository.KitchenOrderRepository;
+import com.easydine.kitchen.service.KitchenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +36,8 @@ public class OrderService {
     private final MenuItemRepository menuItemRepository;
     private final ReservationRepository reservationRepository;
     private final RestaurantTableRepository tableRepository;
+    private final KitchenOrderRepository kitchenOrderRepository;
+    private final KitchenService kitchenService;
 
     @Transactional
     public OrderResponse placeOrder(OrderRequest request, User user) {
@@ -86,6 +91,17 @@ public class OrderService {
             reservation.getTable().setStatus(TableStatus.OCCUPIED);
             tableRepository.save(reservation.getTable());
         }
+
+        // Create Kitchen Order record
+        KitchenOrder kitchenOrder = KitchenOrder.builder()
+                .order(savedOrder)
+                .status(OrderStatus.PLACED)
+                .receivedAt(java.time.LocalDateTime.now())
+                .createdAt(java.time.LocalDateTime.now())
+                .build();
+        kitchenOrderRepository.save(kitchenOrder);
+        
+        kitchenService.broadcastActiveOrders();
         
         return mapToResponse(savedOrder);
     }
@@ -112,7 +128,7 @@ public class OrderService {
         order.setStatus(status);
         
         // If starting prep and no manual estimate, use auto estimate
-        if (status == OrderStatus.IN_KITCHEN) {
+        if (status == OrderStatus.PREPARING) {
             if (estimatedMinutes != null) {
                 order.setEstimatedMinutes(estimatedMinutes);
             } else if (order.getEstimatedMinutes() == null) {
@@ -120,7 +136,25 @@ public class OrderService {
             }
         }
         
-        return mapToResponse(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+
+        // Sync with KitchenOrder
+        kitchenOrderRepository.findByOrderId(orderId).ifPresent(ko -> {
+            ko.setStatus(status);
+            if (status == OrderStatus.PREPARING && ko.getStartedAt() == null) {
+                ko.setStartedAt(java.time.LocalDateTime.now());
+            } else if (status == OrderStatus.READY && ko.getCompletedAt() == null) {
+                ko.setCompletedAt(java.time.LocalDateTime.now());
+            }
+            if (estimatedMinutes != null) {
+                ko.setEstimatedMinutes(estimatedMinutes);
+            }
+            kitchenOrderRepository.save(ko);
+        });
+
+        kitchenService.broadcastActiveOrders();
+
+        return mapToResponse(savedOrder);
     }
 
     private Integer calculateAutoEstimate(Order order) {
@@ -135,7 +169,17 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancellationReason(reason);
-        return mapToResponse(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+
+        // Sync with KitchenOrder
+        kitchenOrderRepository.findByOrderId(orderId).ifPresent(ko -> {
+            ko.setStatus(OrderStatus.CANCELLED);
+            kitchenOrderRepository.save(ko);
+        });
+
+        kitchenService.broadcastActiveOrders();
+
+        return mapToResponse(savedOrder);
     }
 
     private String generateOrderNumber() {

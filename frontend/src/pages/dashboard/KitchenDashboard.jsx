@@ -4,14 +4,15 @@ import useDataStore from '../../store/dataStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import KitchenTicket from '../../components/kitchen/KitchenTicket';
 
-const POLL_INTERVAL = 5000; // 5 seconds
+const POLL_INTERVAL = 10000; // 10 seconds
 
 export default function KitchenDashboard() {
   const { 
     activeOrders, 
     ordersLoading, 
     fetchActiveOrders, 
-    updateOrderStatus 
+    updateOrderStatus,
+    initKitchenWebSocket
   } = useDataStore();
   
   const [lastRefreshed, setLastRefreshed] = useState(new Date());
@@ -27,28 +28,33 @@ export default function KitchenDashboard() {
     }
   };
 
+  const previousOrdersRef = useRef([]);
+
   useEffect(() => {
-    const doFetch = async () => {
-        const result = await fetchActiveOrders();
+    if (activeOrders.length > previousOrdersRef.current.length) {
+        playNotification();
+    }
+    previousOrdersRef.current = activeOrders;
+  }, [activeOrders]);
+
+  useEffect(() => {
+    // Initial fetch
+    fetchActiveOrders();
+    
+    // Connect WebSocket
+    initKitchenWebSocket();
+
+    // Fallback polling every 10 seconds
+    const interval = setInterval(() => {
+        fetchActiveOrders();
         setLastRefreshed(new Date());
-        setCountdown(POLL_INTERVAL / 1000);
-        if (result?.hasNew) {
-            playNotification();
-        }
-    };
+    }, POLL_INTERVAL);
 
-    doFetch();
-
-    const refreshInterval = setInterval(doFetch, POLL_INTERVAL);
-    const countdownInterval = setInterval(() => {
-        setCountdown(prev => (prev > 0 ? prev - 1 : POLL_INTERVAL / 1000));
-    }, 1000);
-
+    // Clean up
     return () => {
-        clearInterval(refreshInterval);
-        clearInterval(countdownInterval);
+        clearInterval(interval);
     };
-  }, [fetchActiveOrders]);
+  }, [fetchActiveOrders, initKitchenWebSocket]);
 
   const handleManualRefresh = async () => {
     await fetchActiveOrders();
@@ -105,8 +111,8 @@ export default function KitchenDashboard() {
                     onClick={handleManualRefresh}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-all active:scale-95"
                 >
-                    <RefreshCcw className={`w-4 h-4 ${countdown >= POLL_INTERVAL/1000 - 1 ? 'animate-spin' : ''}`} />
-                    <span className="text-xs font-black uppercase">{countdown}s</span>
+                    <RefreshCcw className="w-4 h-4" />
+                    <span className="text-xs font-black uppercase">SYNC</span>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-400 hover:text-brand-orange cursor-help transition-colors">
@@ -158,9 +164,9 @@ export default function KitchenDashboard() {
                 </p>
             </div>
             <div className="bg-white dark:bg-surface-dark p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                <p className="text-xs font-bold text-gray-500 uppercase mb-1">In Kitchen</p>
+                <p className="text-xs font-bold text-gray-500 uppercase mb-1">In Progress</p>
                 <p className="text-2xl font-black text-blue-500">
-                    {activeOrders.filter(o => o.status === 'IN_KITCHEN').length}
+                    {activeOrders.filter(o => ['PREPARING', 'COOKING', 'PLATING'].includes(o.status)).length}
                 </p>
             </div>
             <div className="bg-white dark:bg-surface-dark p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">

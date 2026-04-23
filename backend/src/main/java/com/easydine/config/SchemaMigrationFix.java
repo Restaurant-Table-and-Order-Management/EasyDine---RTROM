@@ -39,6 +39,18 @@ public class SchemaMigrationFix implements CommandLineRunner {
             // Fix category in menu_items
             jdbcTemplate.execute("ALTER TABLE menu_items MODIFY COLUMN category VARCHAR(100)");
             log.info("✅ Fixed menu_items.category length");
+            
+            // Fix status in kitchen_orders
+            jdbcTemplate.execute("ALTER TABLE kitchen_orders MODIFY COLUMN status VARCHAR(100)");
+            log.info("✅ Fixed kitchen_orders.status length");
+
+            // Fix created_at default value in kitchen_orders
+            try {
+                jdbcTemplate.execute("ALTER TABLE kitchen_orders MODIFY COLUMN created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6)");
+                log.info("✅ Fixed kitchen_orders.created_at default value");
+            } catch (Exception e) {
+                log.warn("Could not set default value for kitchen_orders.created_at: {}", e.getMessage());
+            }
 
             log.info("✔️ Schema migration fix completed successfully!");
         } catch (Exception e) {

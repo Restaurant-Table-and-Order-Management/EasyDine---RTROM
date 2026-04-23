@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '../api/axiosConfig';
+import webSocketService from '../services/websocket';
 
 const useDataStore = create((set, get) => ({
   // Tables state
@@ -350,6 +351,13 @@ const useDataStore = create((set, get) => ({
       set({ ordersLoading: false });
       return { success: false };
     }
+  },
+
+  initKitchenWebSocket: () => {
+    webSocketService.connect();
+    webSocketService.subscribe('/topic/kitchen/orders', (orders) => {
+        set({ activeOrders: orders, ordersLoading: false });
+    });
   },
 
   fetchReadyOrders: async () => {

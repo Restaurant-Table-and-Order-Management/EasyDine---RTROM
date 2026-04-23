@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle, Flame, AlertTriangle, User, Hash, XCircle } from 'lucide-react';
+import { Clock, CheckCircle, Flame, AlertTriangle, User, Hash, XCircle, ChefHat, Utensils } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import useDataStore from '../../store/dataStore';
@@ -170,13 +170,28 @@ export default function KitchenTicket({ order, onUpdateStatus }) {
             >
               {order.status === 'PLACED' ? (
                 <>
-                  <Flame className="w-4 h-4 mr-2" />
-                  {showEstimates ? 'Starting...' : 'Start'}
+                  <ChefHat className="w-4 h-4 mr-2" />
+                  {showEstimates ? 'Starting...' : 'Start Prep'}
+                </>
+              ) : order.status === 'PREPARING' ? (
+                <>
+                  <Flame className="w-4 h-4 mr-2 text-orange-400" />
+                  Start Cook
+                </>
+              ) : order.status === 'COOKING' ? (
+                <>
+                  <Utensils className="w-4 h-4 mr-2 text-pink-400" />
+                  Start Plating
+                </>
+              ) : order.status === 'PLATING' ? (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Mark Ready
                 </>
               ) : order.status === 'IN_KITCHEN' ? (
                 <>
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Ready
+                  Mark Served
                 </>
               ) : (
                 <>

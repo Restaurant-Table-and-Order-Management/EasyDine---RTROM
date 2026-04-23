@@ -12,11 +12,13 @@ import java.util.List;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-    List<Reservation> findByUserId(Long userId);
+    List<Reservation> findByUserIdOrderByCreatedAtDesc(Long userId);
     
-    List<Reservation> findByReservationDateAndStatus(LocalDate date, ReservationStatus status);
+    List<Reservation> findByReservationDateAndStatusOrderByCreatedAtDesc(LocalDate date, ReservationStatus status);
     
     List<Reservation> findByReservationDateOrderByCreatedAtDesc(LocalDate date);
+
+    List<Reservation> findAllByOrderByCreatedAtDesc();
 
     @Query("SELECT r FROM Reservation r WHERE r.table.id = :tableId AND r.reservationDate = :date " +
            "AND r.status = 'CONFIRMED' " +
