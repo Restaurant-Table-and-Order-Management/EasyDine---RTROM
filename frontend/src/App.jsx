@@ -29,6 +29,7 @@ import MenuManagementPage from './features/menu/MenuManagementPage';
 import CustomerMenuPage from './features/orders/CustomerMenuPage';
 import OrderTrackingPage from './features/orders/OrderTrackingPage';
 import MyOrdersPage from './features/orders/MyOrdersPage';
+import MyPaymentsPage from './features/billing/MyPaymentsPage';
 
 // Guards
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -220,6 +221,14 @@ function App() {
               element={
                 <ProtectedRoute requireAuth={true} requiredRole="CUSTOMER">
                   <MyOrdersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payments"
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="CUSTOMER">
+                  <MyPaymentsPage />
                 </ProtectedRoute>
               }
             />

@@ -21,6 +21,7 @@ const useDataStore = create((set, get) => ({
   myOrders: [],
   myOrdersLoading: false,
   ordersLoading: false,
+  notifications: [],
   // Search state
   searchParams: {
     date: '',
@@ -132,11 +133,14 @@ const useDataStore = create((set, get) => ({
     }
   },
 
-  fetchMyReservations: async () => {
-    set({ reservationsLoading: true });
+  fetchMyReservations: async (silent = false) => {
+    if (!silent) set({ reservationsLoading: true });
     try {
       const response = await api.get('/reservations/my');
-      set({ reservations: Array.isArray(response) ? response : (response.data || []), reservationsLoading: false });
+      set({ 
+        reservations: Array.isArray(response) ? response : (response.data || []), 
+        reservationsLoading: false 
+      });
     } catch (error) {
       set({ reservationsLoading: false });
     }
@@ -417,6 +421,21 @@ const useDataStore = create((set, get) => ({
     } catch (error) {
       set({ myOrdersLoading: false });
     }
+  },
+
+  addNotification: (notification) => {
+    set((state) => ({
+      notifications: [
+        { ...notification, id: Date.now(), read: false, timestamp: new Date() },
+        ...state.notifications
+      ].slice(0, 20) // Keep last 20
+    }));
+  },
+
+  markNotificationsAsRead: () => {
+    set((state) => ({
+      notifications: state.notifications.map(n => ({ ...n, read: true }))
+    }));
   }
 }));
 

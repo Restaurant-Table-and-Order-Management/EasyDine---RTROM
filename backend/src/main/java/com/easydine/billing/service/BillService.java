@@ -106,19 +106,30 @@ public class BillService {
 
     public RevenueReportResponse getRevenueReport() {
         LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
+        LocalDate today = LocalDate.now();
         
-        // Sum of all non-cancelled orders today (subtotal)
+        // 1. Total Running Revenue (All non-cancelled orders today)
         BigDecimal todaySubtotal = orderRepository.sumTotalAmountSince(startOfToday);
         if (todaySubtotal == null) todaySubtotal = BigDecimal.ZERO;
+        BigDecimal totalRevenue = todaySubtotal.multiply(ONE_PLUS_TAX).setScale(2, RoundingMode.HALF_UP);
         
-        // Count of orders today
+        // 2. Settled Revenue (Actually paid via COMPLETED reservations + Direct Orders which are PAID by default)
+        BigDecimal settledFromReservations = reservationRepository.findByReservationDateOrderByCreatedAtDesc(today).stream()
+                .filter(r -> r.getStatus() == com.easydine.reservation.model.ReservationStatus.COMPLETED)
+                .map(r -> r.getTotalPaid() != null ? r.getTotalPaid() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Direct orders are always paid in our current flow
+        BigDecimal settledFromDirect = orderRepository.findAllByCreatedAtAfter(startOfToday).stream()
+                .filter(o -> o.getReservation() == null && !o.getStatus().name().equals("CANCELLED"))
+                .map(o -> o.getTotalAmount().multiply(ONE_PLUS_TAX))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal settledRevenue = settledFromReservations.add(settledFromDirect).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal pendingRevenue = totalRevenue.subtract(settledRevenue).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+
         long orderCount = orderRepository.findAllByCreatedAtAfter(startOfToday).size();
-        
-        // Calculate tax (Simulated 5% GST flow)
-        BigDecimal totalTax = todaySubtotal.multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);
-        
-        // Dynamic Revenue = Subtotal + Tax
-        BigDecimal totalRevenue = todaySubtotal.add(totalTax).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalTax = totalRevenue.subtract(todaySubtotal).setScale(2, RoundingMode.HALF_UP);
         
         BigDecimal avgOrderValue = orderCount > 0 
             ? todaySubtotal.divide(BigDecimal.valueOf(orderCount), 2, RoundingMode.HALF_UP) 
@@ -126,6 +137,8 @@ public class BillService {
 
         return RevenueReportResponse.builder()
                 .totalRevenue(totalRevenue)
+                .settledRevenue(settledRevenue)
+                .pendingRevenue(pendingRevenue)
                 .totalOrders(orderCount)
                 .averageOrderValue(avgOrderValue)
                 .totalTax(totalTax)

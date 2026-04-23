@@ -12,7 +12,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RevenueReportResponse {
-    private BigDecimal totalRevenue;
+    private BigDecimal totalRevenue; // Sum of all orders (running total)
+    private BigDecimal settledRevenue; // Actually paid
+    private BigDecimal pendingRevenue; // Still to be paid
     private long totalOrders;
     private BigDecimal averageOrderValue;
     private BigDecimal totalTax;

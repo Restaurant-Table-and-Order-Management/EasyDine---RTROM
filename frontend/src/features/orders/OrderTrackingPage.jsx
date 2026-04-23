@@ -260,6 +260,16 @@ export default function OrderTrackingPage() {
                       {reservation.status === 'COMPLETED' ? 'PAID' : 'UNPAID'}
                     </span>
                 </div>
+                
+                {reservation.status !== 'COMPLETED' && bill?.grandTotal > 0 && (
+                   <Button 
+                     fullWidth 
+                     onClick={() => navigate('/payments')}
+                     className="mt-4 bg-white text-brand-orange hover:bg-gray-50 border-none font-black uppercase tracking-tighter"
+                   >
+                      Proceed to Payment
+                   </Button>
+                )}
               </div>
             </div>
           </Card>

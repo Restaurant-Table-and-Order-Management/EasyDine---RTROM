@@ -104,6 +104,7 @@ export const NAV_ITEMS = {
     { label: 'Find Tables', path: '/tables', icon: 'Search' },
     { label: 'My Reservations', path: '/my-reservations', icon: 'CalendarCheck' },
     { label: 'My Order', path: '/my-orders', icon: 'ShoppingBag' },
+    { label: 'Payments', path: '/payments', icon: 'Wallet' },
   ],
 };
 

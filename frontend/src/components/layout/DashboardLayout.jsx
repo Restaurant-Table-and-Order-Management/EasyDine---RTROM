@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -11,9 +11,16 @@ import {
   ChefHat,
   Utensils,
   Users,
-  ShoppingBag
+  ShoppingBag,
+  Bell,
+  CheckCircle2,
+  Clock,
+  Wallet
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
+import useDataStore from '../../store/dataStore';
+import { playConfirmationChime } from '../../utils/chime';
+import ReservationConfirmedPopup from '../../features/reservations/ReservationConfirmedPopup';
 import useCartStore from '../../store/cartStore';
 import ThemeToggle from '../common/ThemeToggle';
 import CartDrawer from './CartDrawer';
@@ -28,21 +35,64 @@ const iconMap = {
   Utensils,
   Users,
   ShoppingBag,
+  Wallet,
 };
 
 export default function DashboardLayout() {
   const { user, logout } = useAuthStore();
+  const { 
+    reservations, 
+    fetchMyReservations,
+    notifications,
+    addNotification,
+    markNotificationsAsRead
+  } = useDataStore();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [activePopup, setActivePopup] = useState(null);
   
   const { getTotalItems } = useCartStore();
   const cartItemCount = getTotalItems();
 
+  const notifiedIds = useRef(new Set());
   const role = user?.role || 'CUSTOMER';
-  const navItems = NAV_ITEMS[role] || NAV_ITEMS.CUSTOMER;
-  const roleBadge = ROLE_BADGES[role] || ROLE_BADGES.CUSTOMER;
+
+  // Global Notification Polling
+  useEffect(() => {
+    if (role !== 'CUSTOMER') return;
+
+    fetchMyReservations(true); // Initial silent fetch
+    const pollInterval = setInterval(() => fetchMyReservations(true), 5000);
+    return () => clearInterval(pollInterval);
+  }, [role, fetchMyReservations]);
+
+  // Global Notification Trigger
+  useEffect(() => {
+    if (role !== 'CUSTOMER') return;
+
+    const pendingToConfirmed = reservations.find(r => 
+      r.status === 'CONFIRMED' && !notifiedIds.current.has(r.id)
+    );
+
+    if (pendingToConfirmed) {
+      setActivePopup(pendingToConfirmed);
+      playConfirmationChime();
+      notifiedIds.current.add(pendingToConfirmed.id);
+      
+      // Add to persistent notification list
+      addNotification({
+        type: 'RESERVATION_CONFIRMED',
+        title: 'Booking Confirmed!',
+        message: `Table ${pendingToConfirmed.tableNumber} is reserved for you.`,
+        data: pendingToConfirmed
+      });
+    }
+  }, [reservations, role, addNotification]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleLogout = () => {
     logout();
@@ -59,6 +109,9 @@ export default function DashboardLayout() {
     : role === 'STAFF'
     ? 'Kitchen View'
     : 'RTROM';
+
+  const navItems = NAV_ITEMS[role] || NAV_ITEMS.CUSTOMER;
+  const roleBadge = ROLE_BADGES[role] || ROLE_BADGES.CUSTOMER;
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -207,23 +260,86 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {/* Desktop Header - Only for Customer Cart for now */}
-        <header className="hidden lg:flex sticky top-0 z-30 bg-white/40 dark:bg-surface-dark-deep/40 backdrop-blur-xl px-8 py-4 items-center justify-end">
+        {/* Desktop Header */}
+        <header className="hidden lg:flex sticky top-0 z-30 bg-white/40 dark:bg-surface-dark-deep/40 backdrop-blur-xl px-8 py-4 items-center justify-end gap-4">
           {role === 'CUSTOMER' && (
-            <button 
-              onClick={() => setCartOpen(true)}
-              className="px-4 py-2 rounded-2xl bg-white dark:bg-surface-dark text-gray-600 dark:text-gray-300 hover:text-brand-orange dark:hover:text-brand-orange border border-gray-100 dark:border-gray-800 shadow-sm transition-all flex items-center gap-3 group relative"
-            >
+            <>
+              {/* Notification Center */}
               <div className="relative">
-                <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" />
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-brand-orange text-white text-[9px] font-black flex items-center justify-center shadow-md">
-                    {cartItemCount}
-                  </span>
+                <button 
+                  onClick={() => {
+                    setNotifOpen(!notifOpen);
+                    if (!notifOpen) markNotificationsAsRead();
+                  }}
+                  className="p-2.5 rounded-2xl bg-white dark:bg-surface-dark text-gray-600 dark:text-gray-300 hover:text-brand-orange border border-gray-100 dark:border-gray-800 shadow-sm transition-all group"
+                >
+                  <Bell className={`w-5 h-5 transition-transform ${notifOpen ? 'scale-110 text-brand-orange' : 'group-hover:scale-110'}`} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center shadow-md animate-bounce">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {notifOpen && (
+                  <div className="absolute top-full right-0 mt-3 w-80 bg-white dark:bg-surface-dark rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
+                    <div className="p-4 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50">
+                      <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Notifications</h3>
+                      <button onClick={markNotificationsAsRead} className="text-[10px] font-bold text-brand-orange hover:underline">Mark all read</button>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-12 text-center">
+                          <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                             <Clock className="w-6 h-6 text-gray-300 dark:text-gray-600" />
+                          </div>
+                          <p className="text-xs text-gray-400 font-medium tracking-tight">No notifications yet</p>
+                        </div>
+                      ) : (
+                        notifications.map(n => (
+                          <div 
+                            key={n.id} 
+                            className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-50 dark:border-gray-800 last:border-0 cursor-pointer ${!n.read ? 'bg-brand-orange/5' : ''}`} 
+                            onClick={() => {navigate('/my-reservations'); setNotifOpen(false);}}
+                          >
+                            <div className="flex gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center flex-shrink-0">
+                                <CheckCircle2 className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex justify-between items-start">
+                                  <p className="text-xs font-bold text-gray-900 dark:text-white">{n.title}</p>
+                                  {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-brand-orange" />}
+                                </div>
+                                <p className="text-[10px] text-gray-500 mt-1">{n.message}</p>
+                                <p className="text-[8px] text-gray-400 mt-2 font-bold uppercase tracking-tighter">
+                                   {new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
-              <span className="text-sm font-bold">My Order</span>
-            </button>
+
+              <button 
+                onClick={() => setCartOpen(true)}
+                className="px-4 py-2 rounded-2xl bg-white dark:bg-surface-dark text-gray-600 dark:text-gray-300 hover:text-brand-orange dark:hover:text-brand-orange border border-gray-100 dark:border-gray-800 shadow-sm transition-all flex items-center gap-3 group relative"
+              >
+                <div className="relative">
+                  <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" />
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-brand-orange text-white text-[9px] font-black flex items-center justify-center shadow-md">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm font-bold">My Order</span>
+              </button>
+            </>
           )}
         </header>
 
@@ -232,6 +348,12 @@ export default function DashboardLayout() {
         </main>
       </div>
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      {activePopup && (
+        <ReservationConfirmedPopup 
+          reservation={activePopup} 
+          onClose={() => setActivePopup(null)} 
+        />
+      )}
     </div>
   );
 }
