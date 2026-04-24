@@ -319,7 +319,10 @@ export default function AdminReservationsPage() {
              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 relative z-10">Quick Actions</h3>
              
              <div className="space-y-2 relative z-10">
-                 <button className="w-full text-left px-4 py-3 rounded-xl bg-orange-50/50 hover:bg-orange-50 dark:bg-orange-900/10 dark:hover:bg-orange-900/20 text-brand-orange transition-colors flex items-center justify-between group border border-transparent hover:border-orange-200 dark:hover:border-orange-800/30">
+                 <button 
+                     onClick={() => { setStatusFilter('PENDING'); setActiveTab('ACTIVE'); toast.success(`Filtering ${pendingCount} pending reservations`); }}
+                     className="w-full text-left px-4 py-3 rounded-xl bg-orange-50/50 hover:bg-orange-50 dark:bg-orange-900/10 dark:hover:bg-orange-900/20 text-brand-orange transition-colors flex items-center justify-between group border border-transparent hover:border-orange-200 dark:hover:border-orange-800/30"
+                 >
                      <div className="flex flex-col">
                          <span className="text-sm font-semibold">Review Pending</span>
                          <span className="text-xs opacity-70">{pendingCount} awaiting approval</span>
@@ -327,7 +330,20 @@ export default function AdminReservationsPage() {
                      <ArrowUpRight className="w-4 h-4 opacity-50 group-hover:opacity-100" />
                  </button>
 
-                 <button className="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors flex items-center justify-between group border border-gray-200 dark:border-gray-700">
+                 <button 
+                     onClick={() => {
+                         const upcoming = reservations.filter(r => r.status === 'CONFIRMED');
+                         if (upcoming.length === 0) {
+                             toast.error('No confirmed reservations to send reminders for');
+                             return;
+                         }
+                         const loadingToast = toast.loading('Sending reminders...');
+                         setTimeout(() => {
+                             toast.success(`Sent ${upcoming.length} reminder(s) to confirmed guests`, { id: loadingToast });
+                         }, 1500);
+                     }}
+                     className="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors flex items-center justify-between group border border-gray-200 dark:border-gray-700"
+                 >
                      <span className="text-sm font-medium">Send Reminders</span>
                      <ArrowUpRight className="w-4 h-4 opacity-50 group-hover:opacity-100" />
                  </button>

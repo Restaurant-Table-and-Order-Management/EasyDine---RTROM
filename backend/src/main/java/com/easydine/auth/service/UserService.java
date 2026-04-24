@@ -4,6 +4,10 @@ import com.easydine.auth.dto.UserResponse;
 import com.easydine.auth.entity.Role;
 import com.easydine.auth.entity.User;
 import com.easydine.auth.repository.UserRepository;
+import com.easydine.orders.entity.Order;
+import com.easydine.orders.repository.OrderRepository;
+import com.easydine.reservation.entity.Reservation;
+import com.easydine.reservation.repository.ReservationRepository;
 import com.easydine.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final ReservationRepository reservationRepository;
 
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
@@ -42,6 +48,12 @@ public class UserService {
             throw new RuntimeException("Cannot delete an administrator account");
         }
         
+        List<Order> userOrders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        orderRepository.deleteAll(userOrders);
+
+        List<Reservation> userReservations = reservationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        reservationRepository.deleteAll(userReservations);
+
         userRepository.delete(user);
     }
 

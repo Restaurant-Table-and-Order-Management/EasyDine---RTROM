@@ -25,7 +25,6 @@ import ReorderButton from './ReorderButton';
 import api from '../../api/axiosConfig';
 import { formatTime } from '../../utils/dateHelpers';
 import toast from 'react-hot-toast';
-import PaymentModal from '../../components/orders/PaymentModal';
 
 export default function OrderTrackingPage() {
   const { id: reservationId } = useParams();
@@ -35,7 +34,6 @@ export default function OrderTrackingPage() {
   const [loading, setLoading] = useState(true);
   const [reservation, setReservation] = useState(null);
   const [bill, setBill] = useState(null);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const fetchSessionData = async () => {
     try {
@@ -63,21 +61,16 @@ export default function OrderTrackingPage() {
     }
   };
 
-  const { confirmPayment } = useDataStore();
+  const { confirmPayment, requestAssistance } = useDataStore();
 
-  const handlePayment = async () => {
+  const handleCompleteSession = async () => {
     if (!bill || bill.grandTotal <= 0) {
       toast.error('No pending bill amount');
       return;
     }
-    setIsPaymentModalOpen(true);
-  };
-
-  const handleConfirmFinalPayment = async (method) => {
-    setIsPaymentModalOpen(false);
     const loadingToast = toast.loading('Settling your session...');
     try {
-        const res = await confirmPayment(reservationId, method);
+        const res = await confirmPayment(reservationId, "STRIPE");
         if (res.success) {
           toast.success('Session Completed Successfully!', { id: loadingToast });
           fetchSessionData(); // Refresh the page state to show 'PAID' and 'Download'
@@ -85,7 +78,7 @@ export default function OrderTrackingPage() {
           toast.error(res.message, { id: loadingToast });
         }
     } catch (err) {
-        toast.error('Failed to complete payment. Please try again.', { id: loadingToast });
+        toast.error('Failed to complete session. Please try again.', { id: loadingToast });
     }
   };
 
@@ -317,9 +310,9 @@ export default function OrderTrackingPage() {
                 <div className="flex justify-between items-center text-sm">
                     <span className="opacity-80">Payment Status</span>
                     <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase ${
-                      reservation.status === 'COMPLETED' ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-white/20 text-white'
+                      (reservation.status === 'COMPLETED' || orders.length > 0) ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'bg-white/20 text-white'
                     }`}>
-                      {reservation.status === 'COMPLETED' ? 'PAID' : 'UNPAID'}
+                      {(reservation.status === 'COMPLETED' || orders.length > 0) ? 'PAID' : 'UNPAID'}
                     </span>
                 </div>
                 
@@ -328,14 +321,11 @@ export default function OrderTrackingPage() {
                      <Button 
                        fullWidth 
                        variant="secondary"
-                       onClick={handlePayment}
+                       onClick={handleCompleteSession}
                        className="bg-white !text-brand-orange hover:bg-gray-50 border-none font-black uppercase tracking-widest shadow-xl py-4"
                      >
-                        Pay & Complete Session
+                        Complete Session
                      </Button>
-                     <p className="text-[9px] text-white/60 text-center mt-3 uppercase font-bold tracking-widest">
-                       Secure Checkout with Razorpay
-                     </p>
                    </div>
                 )}
 
@@ -371,18 +361,25 @@ export default function OrderTrackingPage() {
                 <span className="text-sm font-bold text-gray-900 dark:text-white">{reservation.guestCount} Guests</span>
               </div>
             </div>
-            <Button variant="outline" fullWidth className="mt-6 border-red-100 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10">
+            <Button 
+              variant="outline" 
+              fullWidth 
+              className="mt-6 border-red-100 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+              onClick={async () => {
+                const loadingToast = toast.loading('Requesting assistance...');
+                const result = await requestAssistance(reservationId, reservation.tableNumber);
+                if (result.success) {
+                  toast.success('Staff has been notified. Help is on the way!', { id: loadingToast });
+                } else {
+                  toast.error(result.message, { id: loadingToast });
+                }
+              }}
+            >
               Request Assistance
             </Button>
           </Card>
         </div>
       </div>
-      <PaymentModal 
-        isOpen={isPaymentModalOpen} 
-        onClose={() => setIsPaymentModalOpen(false)}
-        onConfirm={handleConfirmFinalPayment}
-        amount={bill?.grandTotal || 0}
-      />
     </div>
   );
 }

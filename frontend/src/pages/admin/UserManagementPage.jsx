@@ -14,6 +14,7 @@ import {
 import useDataStore from '../../store/dataStore';
 import Card from '../../components/ui/Card';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import { USER_ROLES, ROLE_BADGES } from '../../utils/constants';
 import { toast } from 'react-hot-toast';
 
@@ -22,6 +23,7 @@ export default function UserManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('ALL');
   const [isUpdating, setIsUpdating] = useState(null); // stores userId being updated
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, userId: null, userName: '' });
 
   useEffect(() => {
     fetchUsers();
@@ -38,15 +40,22 @@ export default function UserManagementPage() {
     setIsUpdating(null);
   };
 
-  const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
-    
+  const handleDeleteClick = (userId, userName) => {
+    setDeleteModal({ isOpen: true, userId, userName });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { userId } = deleteModal;
+    if (!userId) return;
+
+    const loadingToast = toast.loading('Deleting user...');
     const result = await deleteUser(userId);
     if (result.success) {
-      toast.success('User deleted successfully');
+      toast.success('User deleted successfully', { id: loadingToast });
     } else {
-      toast.error(result.message);
+      toast.error(result.message, { id: loadingToast });
     }
+    setDeleteModal({ isOpen: false, userId: null, userName: '' });
   };
 
   const filteredUsers = allUsers.filter(u => {
@@ -155,7 +164,7 @@ export default function UserManagementPage() {
                       <td className="px-6 py-4 text-right">
                         {user.role !== 'ADMIN' ? (
                           <button 
-                            onClick={() => handleDelete(user.id)}
+                            onClick={() => handleDeleteClick(user.id, user.name)}
                             className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all"
                             title="Delete User"
                           >
@@ -173,6 +182,15 @@ export default function UserManagementPage() {
           </div>
         )}
       </div>
+      <ConfirmModal 
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, userId: null, userName: '' })}
+        onConfirm={handleConfirmDelete}
+        title="Delete User"
+        message={`Are you sure you want to delete "${deleteModal.userName}"? This action cannot be undone and all their data will be permanently removed.`}
+        confirmText="Yes, Delete"
+        variant="danger"
+      />
     </div>
   );
 }

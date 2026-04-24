@@ -30,6 +30,7 @@ import CustomerMenuPage from './features/orders/CustomerMenuPage';
 import OrderTrackingPage from './features/orders/OrderTrackingPage';
 import MyOrdersPage from './features/orders/MyOrdersPage';
 import MyPaymentsPage from './features/billing/MyPaymentsPage';
+import StripeSuccessPage from './features/billing/StripeSuccessPage';
 import PastOrdersPage from './pages/dashboard/PastOrdersPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 
@@ -247,6 +248,22 @@ function App() {
               element={
                 <ProtectedRoute requireAuth={true} requiredRole="CUSTOMER">
                   <MyPaymentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payments/stripe-success"
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="CUSTOMER">
+                  <StripeSuccessPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-tracking/:id"
+              element={
+                <ProtectedRoute requireAuth={true} requiredRole="CUSTOMER">
+                  <OrderTrackingPage />
                 </ProtectedRoute>
               }
             />

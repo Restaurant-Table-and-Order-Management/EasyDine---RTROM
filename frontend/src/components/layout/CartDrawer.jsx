@@ -96,7 +96,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                     <p className="text-sm text-gray-500 max-w-[200px] mt-2">
                       Looks like you haven't added anything to your order yet.
                     </p>
-                    <Button variant="outline" className="mt-6" onClick={onClose}>
+                    <Button variant="outline" className="mt-6" onClick={() => { onClose(); navigate('/menu'); }}>
                       Browse Menu
                     </Button>
                   </div>

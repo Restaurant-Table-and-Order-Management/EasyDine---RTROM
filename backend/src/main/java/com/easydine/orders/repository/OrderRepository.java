@@ -31,4 +31,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByCreatedAtAfter(LocalDateTime since);
     
     boolean existsByTableId(Long tableId);
+    List<Order> findByTableId(Long tableId);
 }

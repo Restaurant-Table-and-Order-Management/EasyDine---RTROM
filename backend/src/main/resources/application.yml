@@ -39,3 +39,9 @@ logging:
     com.easydine: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+stripe:
+  public:
+    key: ${STRIPE_PUBLIC_KEY}
+  secret:
+    key: ${STRIPE_SECRET_KEY}

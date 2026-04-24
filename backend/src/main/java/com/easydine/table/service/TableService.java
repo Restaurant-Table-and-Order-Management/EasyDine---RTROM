@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.easydine.reservation.repository.ReservationRepository;
 import com.easydine.orders.repository.OrderRepository;
+import com.easydine.orders.entity.Order;
 import com.easydine.table.dto.TableDTO;
 import com.easydine.table.dto.TableMapper;
 import com.easydine.table.entity.RestaurantTable;
@@ -119,14 +120,17 @@ public class TableService {
         RestaurantTable table = tableRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Table not found"));
 
-        // Check for dependencies
-        if (reservationRepository.existsByTableId(id)) {
-            throw new RuntimeException("Cannot delete table: It has associated reservations. Try setting it to MAINTENANCE instead.");
+        // Delete associated orders
+        List<Order> orders = orderRepository.findByTableId(id);
+        orderRepository.deleteAll(orders);
+
+        // Delete associated reservations
+        List<com.easydine.reservation.entity.Reservation> reservations = reservationRepository.findByTableId(id);
+        for (com.easydine.reservation.entity.Reservation res : reservations) {
+            List<Order> resOrders = orderRepository.findByReservationIdOrderByCreatedAtDesc(res.getId());
+            orderRepository.deleteAll(resOrders);
         }
-        
-        if (orderRepository.existsByTableId(id)) {
-            throw new RuntimeException("Cannot delete table: It has associated orders.");
-        }
+        reservationRepository.deleteAll(reservations);
 
         tableRepository.delete(table);
     }
