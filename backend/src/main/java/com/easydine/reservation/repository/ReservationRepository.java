@@ -4,6 +4,7 @@ import com.easydine.reservation.entity.Reservation;
 import com.easydine.reservation.model.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -19,6 +20,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByReservationDateOrderByCreatedAtDesc(LocalDate date);
 
     List<Reservation> findAllByOrderByCreatedAtDesc();
+
+    boolean existsByTableId(Long tableId);
 
     @Query("SELECT r FROM Reservation r WHERE r.table.id = :tableId AND r.reservationDate = :date " +
            "AND r.status = 'CONFIRMED' " +

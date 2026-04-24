@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.easydine.reservation.repository.ReservationRepository;
+import com.easydine.orders.repository.OrderRepository;
 import com.easydine.table.dto.TableDTO;
 import com.easydine.table.dto.TableMapper;
 import com.easydine.table.entity.RestaurantTable;
@@ -24,6 +25,7 @@ public class TableService {
 
     private final RestaurantTableRepository tableRepository;
     private final ReservationRepository reservationRepository;
+    private final OrderRepository orderRepository;
     private final TableMapper tableMapper;
 
     public List<TableDTO> getAllTables() {
@@ -114,9 +116,18 @@ public class TableService {
 
     @Transactional
     public void deleteTable(Long id) {
-        if (!tableRepository.existsById(id)) {
-            throw new RuntimeException("Table not found");
+        RestaurantTable table = tableRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Table not found"));
+
+        // Check for dependencies
+        if (reservationRepository.existsByTableId(id)) {
+            throw new RuntimeException("Cannot delete table: It has associated reservations. Try setting it to MAINTENANCE instead.");
         }
-        tableRepository.deleteById(id);
+        
+        if (orderRepository.existsByTableId(id)) {
+            throw new RuntimeException("Cannot delete table: It has associated orders.");
+        }
+
+        tableRepository.delete(table);
     }
 }

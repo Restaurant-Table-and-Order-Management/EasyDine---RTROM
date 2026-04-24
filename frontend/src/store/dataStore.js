@@ -164,7 +164,10 @@ const useDataStore = create((set, get) => ({
       await api.post(`/billing/confirm/${reservationId}`, null, { params: { paymentMethod } });
       return { success: true };
     } catch (error) {
-      return { success: false, message: 'Payment confirmation failed' };
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Payment confirmation failed' 
+      };
     }
   },
 

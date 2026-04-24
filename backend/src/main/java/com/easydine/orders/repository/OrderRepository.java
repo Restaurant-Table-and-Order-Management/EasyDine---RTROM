@@ -29,4 +29,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     BigDecimal sumTotalAmountSince(@Param("since") LocalDateTime since);
 
     List<Order> findAllByCreatedAtAfter(LocalDateTime since);
+    
+    boolean existsByTableId(Long tableId);
 }

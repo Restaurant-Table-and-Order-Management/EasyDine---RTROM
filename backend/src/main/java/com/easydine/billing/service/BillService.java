@@ -13,6 +13,7 @@ import com.easydine.reservation.repository.ReservationRepository;
 import com.easydine.table.model.TableStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,6 +37,7 @@ public class BillService {
     private static final BigDecimal TAX_RATE = new BigDecimal("0.05");
     private static final BigDecimal ONE_PLUS_TAX = BigDecimal.ONE.add(TAX_RATE);
 
+    @Transactional(readOnly = true)
     public BillResponse generateBill(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
@@ -90,9 +92,21 @@ public class BillService {
                 .build();
     }
 
+    @Transactional
     public void confirmPayment(Long reservationId, String paymentMethod) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+        
+        if (reservation.getStatus() == ReservationStatus.COMPLETED) {
+            return; // Already completed, avoid duplicate processing
+        }
+
+        // Check if a bill already exists for this reservation to avoid unique constraint violations
+        if (billRepository.findByReservationId(reservationId).isPresent()) {
+            reservation.setStatus(ReservationStatus.COMPLETED);
+            reservationRepository.save(reservation);
+            return;
+        }
         
         // Final bill calculation for persistence
         BillResponse finalBill = generateBill(reservationId);
