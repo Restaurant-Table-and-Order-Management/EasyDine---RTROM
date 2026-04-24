@@ -20,12 +20,24 @@ public class StripeController {
     @PostMapping("/create-checkout-session")
     public ResponseEntity<Map<String, Object>> createCheckoutSession(@RequestBody Map<String, Object> request) {
         try {
+            System.out.println("DEBUG: create-checkout-session request: " + request);
+            
+            if (request.get("amount") == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "Amount is required"
+                ));
+            }
+
             Long reservationId = 0L;
             if (request.get("reservationId") != null) {
                 try {
                     reservationId = Long.valueOf(request.get("reservationId").toString());
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException e) {
+                    System.err.println("DEBUG: Invalid reservationId format: " + request.get("reservationId"));
+                }
             }
+
             // Amount comes in as rupees (e.g. 525.00), Stripe expects paise (smallest currency unit)
             double amount = Double.parseDouble(request.get("amount").toString());
             long amountInPaise = Math.round(amount * 100);
@@ -33,6 +45,7 @@ public class StripeController {
             String successUrl = (String) request.get("successUrl");
             String cancelUrl = (String) request.get("cancelUrl");
 
+            System.out.println("DEBUG: Creating Stripe session for reservationId=" + reservationId + ", amount=" + amountInPaise);
             String checkoutUrl = stripeService.createCheckoutSession(reservationId, amountInPaise, successUrl, cancelUrl);
 
             return ResponseEntity.ok(Map.of(
@@ -40,15 +53,19 @@ public class StripeController {
                     "url", checkoutUrl
             ));
         } catch (StripeException e) {
+            System.err.println("DEBUG: StripeException: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
                     "message", "Stripe error: " + e.getMessage()
             ));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", "Failed to create checkout session: " + e.getMessage()
-            ));
+            System.err.println("DEBUG: General Exception in createCheckoutSession: " + e.getMessage());
+            e.printStackTrace();
+            Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Failed to create checkout session: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
+            return ResponseEntity.status(500).body(errorResponse);
         }
     }
 
