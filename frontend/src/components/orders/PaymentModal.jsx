@@ -1,22 +1,43 @@
 import React, { useState } from 'react';
-import { X, CreditCard, Banknote, Smartphone, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { X, CreditCard, Banknote, Smartphone, ShieldCheck, CheckCircle2, Zap } from 'lucide-react';
 import Button from '../ui/Button';
-import Card from '../ui/Card';
+import useDataStore from '../../store/dataStore';
+import toast from 'react-hot-toast';
 
 const PAYMENT_METHODS = [
-  { id: 'CASH', label: 'Cash', icon: Banknote, color: 'text-green-500', bg: 'bg-green-500/10', description: 'Pay at the counter' },
-  { id: 'CARD', label: 'Credit/Debit Card', icon: CreditCard, color: 'text-blue-500', bg: 'bg-blue-500/10', description: 'Visa, Mastercard, RuPay' },
-  { id: 'UPI', label: 'UPI / Google Pay', icon: Smartphone, color: 'text-purple-500', bg: 'bg-purple-500/10', description: 'Instant Mobile Transfer' },
+  { id: 'STRIPE', label: 'Pay with Stripe', icon: Zap, color: 'text-indigo-500', bg: 'bg-indigo-500/10', description: 'Secure online payment via Stripe' },
 ];
 
-export default function PaymentModal({ isOpen, onClose, onConfirm, amount }) {
-  const [selectedMethod, setSelectedMethod] = useState(null);
+export default function PaymentModal({ isOpen, onClose, onConfirm, amount, reservationId }) {
+  const [selectedMethod, setSelectedMethod] = useState('STRIPE');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const { createStripeCheckoutSession } = useDataStore();
 
   const handlePayment = async () => {
     if (!selectedMethod) return;
     
+    // Handle Stripe redirect flow
+    if (selectedMethod === 'STRIPE') {
+      setIsProcessing(true);
+      try {
+        const safeReservationId = reservationId || 0;
+        const result = await createStripeCheckoutSession(safeReservationId, amount);
+        if (result.success && result.data?.url) {
+          // Redirect to Stripe Checkout
+          window.location.href = result.data.url;
+        } else {
+          toast.error(result.message || 'Failed to initiate Stripe payment');
+          setIsProcessing(false);
+        }
+      } catch (error) {
+        toast.error('Failed to connect to Stripe');
+        setIsProcessing(false);
+      }
+      return;
+    }
+
+    // Handle standard payment methods (Cash, Card, UPI)
     setIsProcessing(true);
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -81,6 +102,7 @@ export default function PaymentModal({ isOpen, onClose, onConfirm, amount }) {
                         {PAYMENT_METHODS.map((method) => {
                             const Icon = method.icon;
                             const isActive = selectedMethod === method.id;
+                            const isStripe = method.id === 'STRIPE';
                             return (
                                 <button
                                     key={method.id}
@@ -88,19 +110,21 @@ export default function PaymentModal({ isOpen, onClose, onConfirm, amount }) {
                                     onClick={() => setSelectedMethod(method.id)}
                                     className={`w-full p-4 rounded-2xl border-2 flex items-center gap-4 transition-all duration-200 group relative overflow-hidden
                                         ${isActive 
-                                            ? 'border-brand-orange bg-brand-orange/[0.03]' 
+                                            ? isStripe 
+                                                ? 'border-indigo-500 bg-indigo-500/[0.03]' 
+                                                : 'border-brand-orange bg-brand-orange/[0.03]' 
                                             : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 bg-white dark:bg-transparent'}`}
                                 >
                                     <div className={`p-3 rounded-xl transition-colors ${method.bg} ${method.color}`}>
                                         <Icon className="w-6 h-6" />
                                     </div>
                                     <div className="text-left flex-1 min-w-0">
-                                        <p className={`font-bold transition-colors ${isActive ? 'text-brand-orange' : 'text-gray-900 dark:text-white'}`}>
+                                        <p className={`font-bold transition-colors ${isActive ? (isStripe ? 'text-indigo-500' : 'text-brand-orange') : 'text-gray-900 dark:text-white'}`}>
                                             {method.label}
                                         </p>
                                         <p className="text-xs text-gray-500 truncate">{method.description}</p>
                                     </div>
-                                    {isActive && <div className="w-2 h-2 rounded-full bg-brand-orange animate-pulse"></div>}
+                                    {isActive && <div className={`w-2 h-2 rounded-full animate-pulse ${isStripe ? 'bg-indigo-500' : 'bg-brand-orange'}`}></div>}
                                 </button>
                             );
                         })}
@@ -112,9 +136,18 @@ export default function PaymentModal({ isOpen, onClose, onConfirm, amount }) {
                             size="lg"
                             disabled={!selectedMethod || isProcessing}
                             onClick={handlePayment}
-                            className="h-14 bg-gray-900 dark:bg-brand-orange text-white text-lg font-black"
+                            className={`h-14 text-white text-lg font-black ${
+                                selectedMethod === 'STRIPE' 
+                                    ? 'bg-indigo-600 hover:bg-indigo-700' 
+                                    : 'bg-gray-900 dark:bg-brand-orange'
+                            }`}
                         >
-                            {isProcessing ? 'Verifying Transaction...' : `Confirm & Pay ₹${amount.toFixed(2)}`}
+                            {isProcessing 
+                                ? (selectedMethod === 'STRIPE' ? 'Redirecting to Stripe...' : 'Verifying Transaction...') 
+                                : selectedMethod === 'STRIPE' 
+                                    ? `Pay ₹${amount.toFixed(2)} with Stripe` 
+                                    : `Confirm & Pay ₹${amount.toFixed(2)}`
+                            }
                         </Button>
                     </div>
 

@@ -94,6 +94,10 @@ public class BillService {
 
     @Transactional
     public void confirmPayment(Long reservationId, String paymentMethod) {
+        if (reservationId == null || reservationId == 0L) {
+            return;
+        }
+
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
         
@@ -125,7 +129,9 @@ public class BillService {
                 .reservation(reservation)
                 .subtotal(finalBill.getSubtotal())
                 .taxAmount(finalBill.getTaxAmount())
+                .tax(finalBill.getTaxAmount())
                 .discountAmount(finalBill.getDiscountAmount())
+                .discount(finalBill.getDiscountAmount())
                 .grandTotal(finalBill.getGrandTotal())
                 .paymentMethod(paymentMethod != null ? paymentMethod : "UNKNOWN")
                 .build();

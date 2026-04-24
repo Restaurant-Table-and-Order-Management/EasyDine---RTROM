@@ -33,10 +33,17 @@ public class Bill {
     @Column(nullable = false)
     private BigDecimal subtotal;
 
-    @Column(nullable = false)
+    @Column(name = "tax_amount", nullable = false)
     private BigDecimal taxAmount;
 
+    @Column(name = "tax", nullable = false)
+    private BigDecimal tax;
+
+    @Column(name = "discount_amount")
     private BigDecimal discountAmount;
+
+    @Column(name = "discount")
+    private BigDecimal discount;
 
     @Column(nullable = false)
     private BigDecimal grandTotal;

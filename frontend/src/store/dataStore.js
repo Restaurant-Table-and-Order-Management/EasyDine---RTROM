@@ -503,7 +503,46 @@ const useDataStore = create((set, get) => ({
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Failed to delete user' };
     }
-  }
+  },
+
+  // ===================== ASSISTANCE ACTIONS =====================
+  requestAssistance: async (reservationId, tableNumber) => {
+    try {
+      const response = await api.post('/orders/assistance', {
+        reservationId,
+        tableNumber,
+      });
+      return { success: true, message: response.message || 'Assistance requested' };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Failed to request assistance' };
+    }
+  },
+
+  // ===================== STRIPE PAYMENT ACTIONS =====================
+  createStripeCheckoutSession: async (reservationId, amount) => {
+    try {
+      const response = await api.post('/billing/stripe/create-checkout-session', {
+        reservationId,
+        amount,
+        successUrl: `${window.location.origin}/payments/stripe-success?session_id={CHECKOUT_SESSION_ID}&reservation_id=${reservationId}`,
+        cancelUrl: `${window.location.origin}/order-tracking/${reservationId}`,
+      });
+      return { success: true, data: response.data || response };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Failed to create Stripe session' };
+    }
+  },
+
+  verifyStripePayment: async (sessionId, reservationId) => {
+    try {
+      const response = await api.post('/billing/stripe/verify', null, {
+        params: { sessionId, reservationId },
+      });
+      return { success: true, data: response.data || response };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Payment verification failed' };
+    }
+  },
 }));
 
 export default useDataStore;
