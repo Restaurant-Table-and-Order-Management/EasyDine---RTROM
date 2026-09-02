@@ -36,6 +36,10 @@ export default function OrderTrackingPage() {
   const [bill, setBill] = useState(null);
 
   const fetchSessionData = async () => {
+    if (!reservationId || reservationId === 'null' || reservationId === 'undefined') {
+      setLoading(false);
+      return;
+    }
     try {
       const reservationRes = await api.get(`/reservations/${reservationId}`);
       // Handle the ApiResponse wrapper: reservationRes is the envelope, reservationRes.data is the DTO
@@ -100,6 +104,10 @@ export default function OrderTrackingPage() {
   };
 
   useEffect(() => {
+    if (!reservationId || reservationId === 'null' || reservationId === 'undefined') {
+      setLoading(false);
+      return;
+    }
     fetchSessionData();
     // Poll for status updates every 8 seconds for a livelier feel
     const interval = setInterval(fetchSessionData, 8000);

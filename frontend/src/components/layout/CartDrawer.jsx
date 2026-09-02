@@ -20,6 +20,7 @@ export default function CartDrawer({ isOpen, onClose }) {
   };
 
   const handleConfirmPayment = async (paymentMethod) => {
+    if (isPlacingOrder) return;
     setIsPaymentModalOpen(false);
     setIsPlacingOrder(true);
     const loadingToast = toast.loading('Placing your order...');

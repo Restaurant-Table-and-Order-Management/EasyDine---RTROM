@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import useDataStore from '../../store/dataStore';
@@ -14,37 +14,40 @@ export default function StripeSuccessPage() {
 
   const sessionId = searchParams.get('session_id');
   const reservationId = searchParams.get('reservation_id');
+  const processedRef = useRef(false);
 
   useEffect(() => {
     const verify = async () => {
-      if (!sessionId || !reservationId) {
-        setStatus('error');
+      if (!sessionId || !reservationId || processedRef.current) {
+        if (processedRef.current && status === 'verifying') setStatus('success');
         return;
       }
 
+      processedRef.current = true;
       try {
         const result = await verifyStripePayment(sessionId, reservationId);
         if (result.success) {
           
-          if (reservationId === '0') {
-              const { items, clearCart, activeReservationId } = useCartStore.getState();
-              if (items.length > 0) {
-                  try {
-                      const orderData = {
-                          items: items.map((item) => ({
-                              menuItemId: item.id,
-                              quantity: item.quantity,
-                              specialInstructions: item.specialInstructions,
-                          })),
-                          reservationId: activeReservationId,
-                          paymentMethod: 'STRIPE'
-                      };
-                      const api = (await import('../../api/axiosConfig')).default;
-                      await api.post('/orders', orderData);
-                      clearCart();
-                  } catch (e) {
-                      console.error("Failed to create order post-payment", e);
-                  }
+          // Use a fresh import to avoid any stale closures
+          const { items, clearCart, activeReservationId } = useCartStore.getState();
+          
+          if (items.length > 0) {
+              try {
+                  const orderData = {
+                      items: items.map((item) => ({
+                          menuItemId: item.id,
+                          quantity: item.quantity,
+                          specialInstructions: item.specialInstructions,
+                      })),
+                      reservationId: activeReservationId || (reservationId !== '0' ? parseInt(reservationId) : null),
+                      paymentMethod: 'STRIPE'
+                  };
+                  const apiModule = await import('../../api/axiosConfig');
+                  const api = apiModule.default;
+                  await api.post('/orders', orderData);
+                  clearCart();
+              } catch (e) {
+                  console.error("Failed to create order post-payment", e);
               }
           }
 
@@ -53,10 +56,12 @@ export default function StripeSuccessPage() {
         } else {
           setStatus('error');
           toast.error(result.message || 'Payment verification failed');
+          processedRef.current = false; // Allow retry on failure
         }
       } catch (error) {
         setStatus('error');
         toast.error('Failed to verify payment');
+        processedRef.current = false; // Allow retry on failure
       }
     };
 

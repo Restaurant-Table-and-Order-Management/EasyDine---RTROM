@@ -7,6 +7,15 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 3
+      max-lifetime: 240000          # 4 min — must be shorter than Aiven's server timeout (~5 min)
+      idle-timeout: 120000          # 2 min — evict idle connections early
+      connection-timeout: 20000     # 20 sec — max wait for a connection from pool
+      keepalive-time: 60000         # 1 min — send a ping to keep connections alive
+      validation-timeout: 5000     # 5 sec — timeout for connection validation check
+      connection-test-query: SELECT 1
 
   jpa:
     hibernate:
@@ -27,6 +36,8 @@ server:
   port: 8080
   servlet:
     context-path: /api
+  tomcat:
+    connection-timeout: 20000
 
 jwt:
   secret: ${JWT_SECRET}
@@ -37,8 +48,12 @@ logging:
   level:
     root: INFO
     com.easydine: DEBUG
+    com.zaxxer.hikari: WARN
+    org.apache.catalina.connector.CoyoteAdapter: ERROR
+    org.apache.coyote.http11.Http11Processor: ERROR
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
 
 stripe:
   public:
