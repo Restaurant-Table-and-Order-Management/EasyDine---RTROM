@@ -8,6 +8,12 @@ A fully-featured full-stack application for complete restaurant digital operatio
 
 ---
 
+## 🌐 Live Production URL
+
+👉 [https://easy-dine-gamma.vercel.app/](https://easy-dine-gamma.vercel.app/)
+
+---
+
 ## ✨ Features
 
 ### 🔐 Authentication & Authorization
