@@ -33,7 +33,7 @@ spring:
     time-zone: UTC
 
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     context-path: /api
   tomcat:
@@ -60,3 +60,7 @@ stripe:
     key: ${STRIPE_PUBLIC_KEY}
   secret:
     key: ${STRIPE_SECRET_KEY}
+
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,https://*.vercel.app}
+

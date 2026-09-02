@@ -1,0 +1,17 @@
+# Build output
+target/
+
+# Version control & IDE
+.git/
+.gitignore
+.idea/
+*.iml
+.vscode/
+
+# Environment files and secrets (NEVER bake these into images)
+.env
+.env.*
+*.local
+
+# Logs
+*.log
