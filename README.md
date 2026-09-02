@@ -66,11 +66,11 @@ A fully-featured full-stack application for complete restaurant digital operatio
 
 ---
 
-## 🛠️ Tech Stack
-
-**Backend**: Java 21 | Spring Boot 3.2.4 | Spring Security | Spring WebSocket | MySQL 8.0 | Hibernate | JWT | Stripe/Razorpay SDK
-
-**Frontend**: React 18 | Vite | Zustand | Tailwind CSS | Axios | WebSocket | jsPDF | Framer Motion | Lucide Icons
+## 🛠️ Tech Stack & Architecture
+ 
+- **Frontend**: React 18 | Vite | Zustand | Tailwind CSS | Axios | WebSocket (STOMP/SockJS) | Framer Motion | Lucide Icons
+- **Backend**: Java 21 | Spring Boot 3.2.4 | Spring Security | Spring WebSocket | Hibernate / JPA | MySQL 8.0 | Stripe SDK
+- **Cloud & DevOps**: **Docker** (Multi-Stage Build) | **Vercel** (Frontend Hosting) | **Render** (Containerized Backend) | **Aiven** (Cloud Managed MySQL)
 
 ---
 
@@ -382,61 +382,58 @@ kill -9 <PID>
 
 ---
 
-## 🚢 Deployment & Production
+## 🚢 Deployment & Production Setup
 
-### Backend Deployment
+The application is architected for modern cloud deployment:
+
+```
+[ Browser / Client ] ──(HTTPS)──► [ Vercel (React 18 + Vite SPA) ]
+                                            │
+                                      (REST & WebSocket)
+                                            ▼
+                               [ Render (Docker / Spring Boot 3) ]
+                                            │
+                                      (Encrypted JDBC)
+                                            ▼
+                                [ Aiven Cloud (MySQL 8.0) ]
+```
+
+### 1. Backend (Docker + Render)
+The backend uses a multi-stage Docker build (`Dockerfile`) producing an unprivileged, lightweight Alpine Linux container:
+
 ```bash
-# Build production JAR
-mvn clean package
+# Build the Docker image locally
+cd backend
+docker build -t easydine-backend .
 
-# Run with production profile
-java -jar target/easydine-backend-1.0.0.jar --spring.profiles.active=production
+# Run the container with environment variables
+docker run -p 8080:8080 --env-file .env easydine-backend
 ```
 
-### Frontend Deployment
-```bash
-# Build optimized production bundle
-npm run build
+**Render Web Service Settings:**
+* **Root Directory**: `backend`
+* **Runtime**: `Docker`
+* **Environment Variables**:
+  * `DB_URL`: `jdbc:mysql://<host>:<port>/defaultdb?sslMode=REQUIRED`
+  * `DB_USERNAME`: Database username
+  * `DB_PASSWORD`: Database password
+  * `JWT_SECRET`: 256-bit signing secret
+  * `STRIPE_PUBLIC_KEY`: Stripe public key
+  * `STRIPE_SECRET_KEY`: Stripe secret key
 
-# Deploy dist folder to any web server (Nginx, Apache, Vercel, etc.)
-# For Docker:
-docker build -t easydine-frontend .
-docker run -p 80:80 easydine-frontend
-```
+### 2. Frontend (Vercel)
+The React application is deployed as a high-performance Single Page Application on Vercel:
 
-### Database Migration
-```bash
-# Backup current database
-mysqldump -u root -p easydine > backup.sql
+* **Framework Preset**: Vite
+* **Root Directory**: `frontend`
+* **SPA Routing**: Configured via `vercel.json` to route all traffic to `index.html` without 404s.
+* **Environment Variables**:
+  * `VITE_API_BASE_URL`: `https://easydine-backend-fu46.onrender.com/api`
 
-# Update to latest schema
-# Spring Boot automatically migrates on startup with:
-# spring.jpa.hibernate.ddl-auto=update
-```
-
-### Environment Setup for Production
-```env
-# Backend Production (.env)
-SPRING_DATASOURCE_URL=jdbc:mysql://prod-db-server:3306/easydine
-SPRING_DATASOURCE_USERNAME=prod_user
-SPRING_DATASOURCE_PASSWORD=secure_password
-JWT_SECRET=production_secret_key_very_secure_min_32_chars
-JWT_EXPIRATION=86400000
-SERVER_PORT=8080
-SPRING_JPA_HIBERNATE_DDL_AUTO=validate
-SPRING.PROFILES.ACTIVE=production
-
-# Payment Gateway
-STRIPE_API_KEY=sk_live_xxxxx
-RAZORPAY_API_KEY=xxxx
-RAZORPAY_SECRET=xxxx
-
-# Email Service
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=noreply@easydine.com
-MAIL_PASSWORD=xxxx
-```
+### 3. Database (Aiven Cloud MySQL)
+* High-availability managed MySQL 8.0 cluster.
+* SSL encryption enabled (`sslMode=REQUIRED`).
+* HikariCP connection pool tuned for cloud eviction and keepalive.
 
 ---
 
