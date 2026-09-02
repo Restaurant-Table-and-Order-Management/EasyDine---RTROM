@@ -10,7 +10,15 @@ A fully-featured full-stack application for complete restaurant digital operatio
 
 ## 🌐 Live Production URL
 
-👉 [https://easy-dine-gamma.vercel.app/](https://easy-dine-gamma.vercel.app/)
+👉 **[https://easy-dine-gamma.vercel.app/](https://easy-dine-gamma.vercel.app/)**
+
+### 🔑 Demo Accounts (Instant Access)
+
+| Role | Email | Password | Access / Dashboard |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@easydine.com` | `Admin@123` | Table management, Menu editor, Reservations, User management & Analytics |
+| **Kitchen Staff** | `kitchen@easydine.com` | `Kitchen@123` | Kitchen Display System (KDS) & Real-time order progress |
+| **Customer** | `customer@easydine.com` | `Customer@123` | Table booking, Menu browsing, Cart & Stripe checkout |
 
 ---
 
