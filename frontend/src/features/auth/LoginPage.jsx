@@ -169,10 +169,54 @@ export default function LoginPage() {
                   Sign In
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
+                {isLoading && (
+                  <p className="text-xs text-center text-brand-orange font-medium animate-pulse mt-3">
+                    Connecting to server... (First request takes ~30s if cloud server was asleep)
+                  </p>
+                )}
               </div>
             </form>
 
-            <div className="mt-8 text-center text-sm">
+            {/* Quick Demo Login Fillers */}
+            <div className="mt-6 pt-5 border-t border-gray-100 dark:border-white/10">
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider text-center mb-3">
+                Quick Demo Accounts (1-Click Fill)
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData({ email: 'admin@easydine.com', password: 'Admin@123' });
+                    setFormErrors({});
+                  }}
+                  className="px-2 py-2 text-xs font-semibold bg-gray-50 dark:bg-white/5 hover:bg-brand-orange/10 hover:text-brand-orange text-gray-700 dark:text-gray-200 rounded-xl border border-gray-200/80 dark:border-white/10 transition-all text-center"
+                >
+                  👑 Admin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData({ email: 'customer@easydine.com', password: 'Customer@123' });
+                    setFormErrors({});
+                  }}
+                  className="px-2 py-2 text-xs font-semibold bg-gray-50 dark:bg-white/5 hover:bg-brand-orange/10 hover:text-brand-orange text-gray-700 dark:text-gray-200 rounded-xl border border-gray-200/80 dark:border-white/10 transition-all text-center"
+                >
+                  🍽️ Customer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData({ email: 'kitchen@easydine.com', password: 'Kitchen@123' });
+                    setFormErrors({});
+                  }}
+                  className="px-2 py-2 text-xs font-semibold bg-gray-50 dark:bg-white/5 hover:bg-brand-orange/10 hover:text-brand-orange text-gray-700 dark:text-gray-200 rounded-xl border border-gray-200/80 dark:border-white/10 transition-all text-center"
+                >
+                  👨‍🍳 Kitchen
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-6 text-center text-sm">
               <p className="text-gray-500 dark:text-gray-400">
                 Don&apos;t have an account?{' '}
                 <Link to="/signup" replace className="text-brand-orange hover:text-brand-orange-dark font-semibold transition-colors">

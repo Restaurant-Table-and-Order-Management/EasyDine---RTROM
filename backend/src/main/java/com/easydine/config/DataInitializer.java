@@ -49,40 +49,25 @@ public class DataInitializer implements CommandLineRunner {
     //  USERS
     // ─────────────────────────────────────────────
     private void seedUsers() {
-        if (userRepository.count() > 0) {
-            log.info("Users already seeded – skipping.");
-            return;
+        seedUserIfNotExists("Admin User", "admin@easydine.com", "Admin@123", Role.ADMIN);
+        seedUserIfNotExists("Admin User", "1@gmail.com", "123456", Role.ADMIN);
+        seedUserIfNotExists("Demo Customer", "customer@easydine.com", "Customer@123", Role.CUSTOMER);
+        seedUserIfNotExists("Test Customer", "customer@gmail.com", "123456", Role.CUSTOMER);
+        seedUserIfNotExists("Kitchen Chef", "kitchen@easydine.com", "Kitchen@123", Role.KITCHEN_STAFF);
+        seedUserIfNotExists("Chef Gordon", "chef@gmail.com", "123456", Role.KITCHEN_STAFF);
+        seedUserIfNotExists("Waiter Sam", "waiter@gmail.com", "123456", Role.WAITER);
+    }
+
+    private void seedUserIfNotExists(String name, String email, String password, Role role) {
+        if (userRepository.findByEmail(email).isEmpty()) {
+            userRepository.save(User.builder()
+                    .name(name)
+                    .email(email)
+                    .password(passwordEncoder.encode(password))
+                    .role(role)
+                    .build());
+            log.info("✅ Seeded user: {} ({})", email, role);
         }
-
-        List<User> users = List.of(
-            User.builder()
-                .name("Admin User")
-                .email("1@gmail.com")
-                .password(passwordEncoder.encode("123456"))
-                .role(Role.ADMIN)
-                .build(),
-            User.builder()
-                .name("Test Customer")
-                .email("customer@gmail.com")
-                .password(passwordEncoder.encode("123456"))
-                .role(Role.CUSTOMER)
-                .build(),
-            User.builder()
-                .name("Chef Gordon")
-                .email("chef@gmail.com")
-                .password(passwordEncoder.encode("123456"))
-                .role(Role.KITCHEN_STAFF)
-                .build(),
-            User.builder()
-                .name("Waiter Sam")
-                .email("waiter@gmail.com")
-                .password(passwordEncoder.encode("123456"))
-                .role(Role.WAITER)
-                .build()
-        );
-
-        userRepository.saveAll(users);
-        log.info("✅ Seeded {} users.", users.size());
     }
 
     // ─────────────────────────────────────────────

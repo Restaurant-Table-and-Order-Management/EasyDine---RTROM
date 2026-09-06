@@ -240,6 +240,11 @@ export default function SignupPage() {
               Create Account
               <ArrowRight className="w-4 h-4" />
             </Button>
+            {isLoading && (
+              <p className="text-xs text-center text-brand-orange font-medium animate-pulse mt-3">
+                Creating your account... (Takes ~30s if the cloud server was sleeping)
+              </p>
+            )}
           </form>
 
           <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import api from './api/axiosConfig';
 
 // Layout
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -38,6 +39,11 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 function App() {
+  // Silent background warmup ping to boot up Render free tier container immediately on visit
+  useEffect(() => {
+    api.get('/auth/health').catch(() => {});
+  }, []);
+
   return (
     <>
       <Toaster

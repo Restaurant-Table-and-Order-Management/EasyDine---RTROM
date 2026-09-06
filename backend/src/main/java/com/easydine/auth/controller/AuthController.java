@@ -33,6 +33,11 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("If the email exists, a reset link has been sent.", null));
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<ApiResponse<String>> health() {
+        return ResponseEntity.ok(ApiResponse.success("EasyDine backend is healthy and awake"));
+    }
+
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody java.util.Map<String, String> request) {
         authService.resetPassword(request.get("token"), request.get("newPassword"));
